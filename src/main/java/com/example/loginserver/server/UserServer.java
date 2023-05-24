@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.loginserver.vo.UserVO;
 
+import java.util.List;
+
 @Service
 public class UserServer {
     @Autowired
@@ -36,7 +38,12 @@ public class UserServer {
         return userId;
     }
     private UserEntity getById(long id){
-        UserEntity user=userRepository.getById(id);
+        UserEntity user;
+        user=userRepository.getById(id);
+        return user;
+    }
+    public List<UserEntity> getByUserName(String userName){
+        List<UserEntity> user=userRepository.getByUserName(userName);
         return user;
     }
 }
