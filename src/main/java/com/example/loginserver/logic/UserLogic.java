@@ -1,39 +1,29 @@
 package com.example.loginserver.logic;
-
-import com.example.loginserver.entity.UserEntity;
-import com.example.loginserver.enums.ErrorsEnum;
+import com.example.loginserver.enums.ErrorsEnumForUser;
 import com.example.loginserver.repository.UserRepository;
-import com.example.loginserver.server.UserServer;
-import com.example.loginserver.vo.UserVO;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
 
+
 public class UserLogic {
-    private  int sizeOfCode=6;
-    private UserServer server= new UserServer();
-    private  ErrorsEnum checkUserIsSystem(String userName){
-        List<UserEntity> listUsers=server.getByUserName(userName);
-        if(listUsers.isEmpty()){
-            return ErrorsEnum.GOOD;
-        }
-        return ErrorsEnum.UserExistError;
-    }
-    private  ErrorsEnum checkUserName(String userName){
+
+    private int sizeOfCode=6;
+
+
+    public   ErrorsEnumForUser checkUserName(String userName){
         if(!userName.contains("[A-Z]")){
-            return ErrorsEnum.NotBigSmallCapsError;
+            return ErrorsEnumForUser.NotBigSmallCapsError;
         }
         if(!userName.contains("[a-z]")){
-            return ErrorsEnum.NotSmallCapsError;
+            return ErrorsEnumForUser.NotSmallCapsError;
         }
         if(userName.length()<8||userName.length()>16){
-            return ErrorsEnum.LengthError;
+            return ErrorsEnumForUser.LengthError;
         }
-        return ErrorsEnum.GOOD;
+        return ErrorsEnumForUser.GOOD;
     }
-    private  String getCodeToGmail(){
+    public   String getCodeToGmail(){
         Random random=new Random();
         String code="";
         String codeNow="";
@@ -44,65 +34,36 @@ public class UserLogic {
         return code;
     }
 
-    private  ErrorsEnum checkEmail(String gmail){
-        ErrorsEnum e;
+    public ErrorsEnumForUser checkEmail(String gmail){
+        ErrorsEnumForUser e;
         e=ConToServerGmail.connectToServer("http://localhost:8080/sendGmail/send","post");
-        if(e!=ErrorsEnum.GOOD){
+        if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
         String code=getCodeToGmail();
         e=ConToServerGmail.sendToServer(gmail,code);
-        if(e!=ErrorsEnum.GOOD){
+        if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
         e=ConToServerGmail.getFromServer();
         return e;
     }
-    private  ErrorsEnum checkName(String name){
+    public    ErrorsEnumForUser checkName(String name){
         if(name.contains("[0-9]")){
-            return ErrorsEnum.ThereIsANumber;
+            return ErrorsEnumForUser.ThereIsANumber;
         }
         if(name.length()<=1){
-            return ErrorsEnum.LengthError;
+            return ErrorsEnumForUser.LengthError;
         }
-        return ErrorsEnum.GOOD;
+        return ErrorsEnumForUser.GOOD;
     }
-    private ErrorsEnum checkBirthDay(Date birthDay){
+    public ErrorsEnumForUser checkBirthDay(Date birthDay){
         Date now = new Date();
         long diffInMilliseconds=now.getTime()-birthDay.getTime();
         long diffInYears = diffInMilliseconds / (60 * 1000* 60* 24 *365);
         if(diffInYears<=7){
-            return ErrorsEnum.BirthDayError;
+            return ErrorsEnumForUser.BirthDayError;
         }
-        return ErrorsEnum.GOOD;
-    }
-    public ErrorsEnum checkUser(UserVO user){
-        ErrorsEnum e;
-        e=checkUserIsSystem(user.getUserName());
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        e=checkUserName(user.getUserName());
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        e=checkEmail(user.getEmail());
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        e=checkName(user.getName());
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        e=checkBirthDay(user.getBirthDay());
-        return e;
-    }
-    public ErrorsEnum checkUserExistById(long id){
-        UserRepository repository = null;
-        repository.getById(id);
-        if(repository==null){
-            return ErrorsEnum.UserNotFoundError;
-        }
-        return ErrorsEnum.GOOD;
+        return ErrorsEnumForUser.GOOD;
     }
 }

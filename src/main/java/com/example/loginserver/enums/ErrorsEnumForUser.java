@@ -2,7 +2,7 @@ package com.example.loginserver.enums;
 
 
 
-public enum ErrorsEnum {
+public enum ErrorsEnumForUser {
     URLError,
     OpenConnectionError,
     ElseError,
@@ -14,7 +14,8 @@ public enum ErrorsEnum {
     LengthError,
     ThereIsANumber,
     BirthDayError,
-    UserExistError
+    UserExistError,
+    NotChanged
 
 }
 

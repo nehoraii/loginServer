@@ -17,20 +17,10 @@ import java.util.Date;
  * @author user
  */
 @Entity
-@Table(name = "user")
+@Table(name = "user",schema = "public")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@NamedQueries({
-        @NamedQuery(name = "UserEntity.findAll", query = "SELECT u FROM UserEntity u"),
-        @NamedQuery(name = "UserEntity.findById", query = "SELECT u FROM UserEntity u WHERE u.id = :id"),
-        @NamedQuery(name = "UserEntity.findByName", query = "SELECT u FROM UserEntity u WHERE u.name = :name"),
-        @NamedQuery(name = "UserEntity.findBySecName", query = "SELECT u FROM UserEntity u WHERE u.secName = :secName"),
-        @NamedQuery(name = "UserEntity.findByEmail", query = "SELECT u FROM UserEntity u WHERE u.email = :email"),
-        @NamedQuery(name = "UserEntity.findByPhone", query = "SELECT u FROM UserEntity u WHERE u.phone = :phone"),
-        @NamedQuery(name = "UserEntity.findByUserName", query = "SELECT u FROM UserEntity u WHERE u.userName = :userName"),
-        @NamedQuery(name = "UserEntity.findByBirthDay", query = "SELECT u FROM UserEntity u WHERE u.birthDay = :birthDay"),
-        @NamedQuery(name = "UserEntity.findBySecretKey", query = "SELECT u FROM UserEntity u WHERE u.secretKey = :secretKey")})
 public class UserEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -61,5 +51,4 @@ public class UserEntity implements Serializable {
     @Basic(optional = false)
     @Column(name = "secret_key")
     private String secretKey;
-
 }

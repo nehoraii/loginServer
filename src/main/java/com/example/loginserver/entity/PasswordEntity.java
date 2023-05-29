@@ -12,22 +12,16 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.Date;
 
+
 /**
  *
  * @author user
  */
 @Entity
-@Table(name = "password")
+@Table(name = "password",schema = "public")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@NamedQueries({
-        @NamedQuery(name = "PasswordEntity.findAll", query = "SELECT p FROM PasswordEntity p"),
-        @NamedQuery(name = "PasswordEntity.findById", query = "SELECT p FROM PasswordEntity p WHERE p.id = :id"),
-        @NamedQuery(name = "PasswordEntity.findByUserId", query = "SELECT p FROM PasswordEntity p WHERE p.userId = :userId"),
-        @NamedQuery(name = "PasswordEntity.findByPass", query = "SELECT p FROM PasswordEntity p WHERE p.pass = :pass"),
-        @NamedQuery(name = "PasswordEntity.findByDate", query = "SELECT p FROM PasswordEntity p WHERE p.date = :date")})
-
 public class PasswordEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

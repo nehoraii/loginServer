@@ -1,6 +1,7 @@
 package com.example.loginserver.controller;
 
 
+import com.example.loginserver.enums.ErrorsEnumForPassword;
 import com.example.loginserver.server.PasswordServer;
 import com.example.loginserver.vo.PasswordVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +15,22 @@ public class PasswordController {
     @Autowired
     private PasswordServer passwordServer;
     @PostMapping("/save")
-    public long save(@RequestBody PasswordVo passwordVo){
-        long userId=passwordServer.save(passwordVo);
-        return userId;
+    public ErrorsEnumForPassword save(@RequestBody PasswordVo passwordVo){
+        ErrorsEnumForPassword e;
+        e=passwordServer.save(passwordVo);
+        return e;
     }
     @DeleteMapping("/delete")
-    public long delete(PasswordVo passwordVo){
-        long userId=passwordServer.delete(passwordVo.getId());
-        return userId;
+    public ErrorsEnumForPassword delete(PasswordVo passwordVo){
+        ErrorsEnumForPassword e;
+        e=passwordServer.delete(passwordVo.getId());
+        return e;
     }
     @PutMapping("/update")
-    public long update(@RequestBody PasswordVo passwordVo){
-        long userId=passwordServer.update(passwordVo);
-        return userId;
+    public ErrorsEnumForPassword update(@RequestBody PasswordVo passwordVo){
+        ErrorsEnumForPassword e;
+        e=passwordServer.update(passwordVo);
+        return e;
     }
 
 }

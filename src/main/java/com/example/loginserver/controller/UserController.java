@@ -1,6 +1,6 @@
 package com.example.loginserver.controller;
 
-import com.example.loginserver.enums.ErrorsEnum;
+import com.example.loginserver.enums.ErrorsEnumForUser;
 import com.example.loginserver.logic.UserLogic;
 import com.example.loginserver.server.UserServer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,40 +17,27 @@ import com.example.loginserver.vo.UserVO;
 public class UserController {
     @Autowired
     private UserServer userServer;
-    private ErrorsEnum e;
+    private ErrorsEnumForUser e;
     @Bean
     public WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> webServerFactoryCustomizer() {
         return factory -> factory.setPort(8081);
     }
 
     @PostMapping("/save")
-    public ErrorsEnum addUser(@RequestBody UserVO userVO){
-        UserLogic user=new UserLogic();
-        e=user.checkUser(userVO);
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        userServer.save(userVO);
-        return ErrorsEnum.GOOD;
+    public ErrorsEnumForUser addUser(@RequestBody UserVO userVO){
+        ErrorsEnumForUser e;
+        e=userServer.save(userVO);
+        return e;
     }
+
     @DeleteMapping("/delete")
-    public ErrorsEnum delete(@RequestBody UserVO userVO){
-        UserLogic user=new UserLogic();
-        e=user.checkUserExistById(userVO.getId());
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        userServer.delete(userVO.getId());
-        return ErrorsEnum.GOOD;
+    public ErrorsEnumForUser delete(@RequestBody UserVO userVO){
+        e=userServer.delete(userVO.getId());
+        return ErrorsEnumForUser.GOOD;
     }
     @PutMapping("/update")
-    public ErrorsEnum update(@RequestBody UserVO userVO){
-        UserLogic user =new UserLogic();
-        e=user.checkUserExistById(userVO.getId());
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        userServer.update(userVO);
+    public ErrorsEnumForUser update(@RequestBody UserVO userVO){
+        e=userServer.update(userVO);
         return e;
     }
 }
