@@ -12,6 +12,7 @@ public class UserVO {
     private String phone;
     private String userName;
     private Date birthDay;
+    private String secretKey;
 
 
 }

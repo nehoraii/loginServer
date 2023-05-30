@@ -1,9 +1,11 @@
 package com.example.loginserver.enums;
 
-public enum ErrorsEnumConnection {
+public enum ErrorsEnumForLogin {
     URLError,
     OpenConnectionError,
     ElseError,
     ReadError,
     GOOD,
+    BLOCK,
+    SPAM
 }

@@ -1,21 +1,23 @@
 package com.example.loginserver.logic;
 import com.example.loginserver.enums.ErrorsEnumForUser;
-import com.example.loginserver.repository.UserRepository;
+import org.apache.commons.codec.binary.Base32;
 
+import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Random;
 
 
 public class UserLogic {
 
-    private int sizeOfCode=6;
+    private static int sizeOfCode=6;
 
 
-    public   ErrorsEnumForUser checkUserName(String userName){
-        if(!userName.contains("[A-Z]")){
+    public static   ErrorsEnumForUser checkUserName(String userName){
+        if(!userName.matches(".*[A-Z].*")){
             return ErrorsEnumForUser.NotBigSmallCapsError;
         }
-        if(!userName.contains("[a-z]")){
+        if(!userName.matches(".*[a-z].*")){
             return ErrorsEnumForUser.NotSmallCapsError;
         }
         if(userName.length()<8||userName.length()>16){
@@ -23,7 +25,7 @@ public class UserLogic {
         }
         return ErrorsEnumForUser.GOOD;
     }
-    public   String getCodeToGmail(){
+    public  static String getCodeToGmail(){
         Random random=new Random();
         String code="";
         String codeNow="";
@@ -34,7 +36,7 @@ public class UserLogic {
         return code;
     }
 
-    public ErrorsEnumForUser checkEmail(String gmail){
+    public static ErrorsEnumForUser checkEmail(String gmail){
         ErrorsEnumForUser e;
         e=ConToServerGmail.connectToServer("http://localhost:8080/sendGmail/send","post");
         if(e!=ErrorsEnumForUser.GOOD){
@@ -48,7 +50,7 @@ public class UserLogic {
         e=ConToServerGmail.getFromServer();
         return e;
     }
-    public    ErrorsEnumForUser checkName(String name){
+    public static    ErrorsEnumForUser checkName(String name){
         if(name.contains("[0-9]")){
             return ErrorsEnumForUser.ThereIsANumber;
         }
@@ -57,13 +59,22 @@ public class UserLogic {
         }
         return ErrorsEnumForUser.GOOD;
     }
-    public ErrorsEnumForUser checkBirthDay(Date birthDay){
-        Date now = new Date();
-        long diffInMilliseconds=now.getTime()-birthDay.getTime();
-        long diffInYears = diffInMilliseconds / (60 * 1000* 60* 24 *365);
-        if(diffInYears<=7){
+    public static ErrorsEnumForUser checkBirthDay(Date birthDay){
+        LocalDate now=LocalDate.now();
+       int yearsUser=birthDay.getYear();
+       int yearsNow=now.getYear();
+        int years=yearsNow-yearsUser;
+        if(years<=7){
             return ErrorsEnumForUser.BirthDayError;
         }
         return ErrorsEnumForUser.GOOD;
+    }
+    public static String getSecretKey(){
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[20];
+        random.nextBytes(bytes);
+        Base32 base32 = new Base32();
+        return base32.encodeToString(bytes);
+
     }
 }

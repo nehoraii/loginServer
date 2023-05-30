@@ -3,7 +3,6 @@ package com.example.loginserver.server;
 
 import com.example.loginserver.entity.PasswordEntity;
 import com.example.loginserver.enums.ErrorsEnumForPassword;
-import com.example.loginserver.enums.ErrorsEnumForUser;
 import com.example.loginserver.logic.PasswordLogic;
 import com.example.loginserver.repository.PasswordRepository;
 import com.example.loginserver.vo.PasswordVo;
@@ -25,14 +24,13 @@ public class PasswordServer {
 
     public ErrorsEnumForPassword save(PasswordVo passwordVo){
         ErrorsEnumForPassword e;
-        PasswordLogic passwordLogic=new PasswordLogic();
-        e=passwordLogic.checkPassObject(passwordVo);
+        e=PasswordLogic.checkPassObject(passwordVo);
         if(e!=ErrorsEnumForPassword.GOOD){
             return e;
         }
         PasswordEntity bean= new PasswordEntity();
         BeanUtils.copyProperties(passwordVo,bean);
-        bean=passwordRepository.save(bean);
+        passwordRepository.save(bean);
         return ErrorsEnumForPassword.GOOD;
     }
 

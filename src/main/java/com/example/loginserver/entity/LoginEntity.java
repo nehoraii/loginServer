@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  *
@@ -49,6 +50,10 @@ public class LoginEntity implements Serializable {
     private boolean sec;
     @Column(name = "sec_pass")
     private String secPass;
+    @Basic(optional = false)
+    @Column(name = "date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date date;
 
 
 }

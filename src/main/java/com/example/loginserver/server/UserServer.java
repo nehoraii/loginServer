@@ -18,7 +18,7 @@ import java.util.Optional;
 public class UserServer {
     @Autowired
     private  UserRepository userRepository;
-    private UserLogic userLogic=new UserLogic();
+    //private UserLogic userLogic=new UserLogic();
 
     public UserServer(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -30,6 +30,8 @@ public class UserServer {
         if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
+        String secretKey= UserLogic.getSecretKey();
+        userVO.setSecretKey(secretKey);
         UserEntity bean= new UserEntity();
         BeanUtils.copyProperties(userVO,bean);
         userRepository.save(bean);
@@ -56,7 +58,7 @@ public class UserServer {
         return ErrorsEnumForUser.GOOD;
     }
     //בגלל שיש שאילתה ואני צריך את המשתנה server אז בניתי כאן את הפונקצייה בודקת אם קיים שם משתמש כזה
-    private UserEntity getByUserName(String userName){
+   private UserEntity getByUserName(String userName){
         Optional<UserEntity> user=userRepository.getByUserName(userName);
         if(!user.isPresent()){
             return null;
@@ -70,19 +72,19 @@ public class UserServer {
         if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
-        e=userLogic.checkUserName(user.getUserName());
+        e=UserLogic.checkUserName(user.getUserName());
         if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
-        e=userLogic.checkEmail(user.getEmail());
+        e=UserLogic.checkEmail(user.getEmail());
         if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
-        e=userLogic.checkName(user.getName());
+        e=UserLogic.checkName(user.getName());
         if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
-        e=userLogic.checkBirthDay(user.getBirthDay());
+        e=UserLogic.checkBirthDay(user.getBirthDay());
         return e;
     }
     private ErrorsEnumForUser checkUserIsSystem(String userName){
