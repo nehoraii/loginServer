@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -24,6 +25,10 @@ public class PasswordServer {
 
     public ErrorsEnumForPassword save(PasswordVo passwordVo){
         ErrorsEnumForPassword e;
+        e=changePassForUpdate(passwordVo.getUserId(),passwordVo.getPass());
+        if(e!=ErrorsEnumForPassword.GOOD){
+            return e;
+        }
         e=PasswordLogic.checkPassObject(passwordVo);
         if(e!=ErrorsEnumForPassword.GOOD){
             return e;
@@ -40,7 +45,7 @@ public class PasswordServer {
     }
     public ErrorsEnumForPassword update(PasswordVo passwordVo){
         ErrorsEnumForPassword e;
-        e=changePassForUpdate(passwordVo.getId(),passwordVo.getPass());
+        e=changePassForUpdate(passwordVo.getUserId(),passwordVo.getPass());
         if(e!=ErrorsEnumForPassword.GOOD){
             return e;
         }
@@ -55,12 +60,18 @@ public class PasswordServer {
         return user;
     }
     private ErrorsEnumForPassword changePassForUpdate(long id,String password){
-        Optional<PasswordEntity> passwordEntity=passwordRepository.findById(id);
+        Optional<List<PasswordEntity>> passwordEntity;
+        passwordEntity=passwordRepository.getAllById(id);
         if(!passwordEntity.isPresent()){
             return ErrorsEnumForPassword.UserNotFound;
         }
-        if(passwordEntity.get().equals(password)){
+        if(passwordEntity.get().get(passwordEntity.get().size()-1).getPass().equals(password)){
             return ErrorsEnumForPassword.TheSamePassword;
+        }
+        for (int i = 0; i < passwordEntity.get().size(); i++) {
+            if(passwordEntity.get().get(i).equals(password)){
+                return ErrorsEnumForPassword.PastUse;
+            }
         }
         return ErrorsEnumForPassword.GOOD;
     }

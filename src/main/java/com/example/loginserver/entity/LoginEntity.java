@@ -18,19 +18,11 @@ import java.util.Date;
  * @author user
  */
 @Entity
-@Table(name = "login")
+@Table(name = "login",schema = "public")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
-@NamedQueries({
-        @NamedQuery(name = "LoginEntity.findAll", query = "SELECT l FROM LoginEntity l"),
-        @NamedQuery(name = "LoginEntity.findById", query = "SELECT l FROM LoginEntity l WHERE l.id = :id"),
-        @NamedQuery(name = "LoginEntity.findByUserId", query = "SELECT l FROM LoginEntity l WHERE l.userId = :userId"),
-        @NamedQuery(name = "LoginEntity.findByPass", query = "SELECT l FROM LoginEntity l WHERE l.pass = :pass"),
-        @NamedQuery(name = "LoginEntity.findByIp", query = "SELECT l FROM LoginEntity l WHERE l.ip = :ip"),
-        @NamedQuery(name = "LoginEntity.findBySec", query = "SELECT l FROM LoginEntity l WHERE l.sec = :sec"),
-        @NamedQuery(name = "LoginEntity.findBySecPass", query = "SELECT l FROM LoginEntity l WHERE l.secPass = :secPass")})
 public class LoginEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -48,8 +40,6 @@ public class LoginEntity implements Serializable {
     @Basic(optional = false)
     @Column(name = "sec")
     private boolean sec;
-    @Column(name = "sec_pass")
-    private String secPass;
     @Basic(optional = false)
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)

@@ -10,17 +10,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Service
 public class LoginServer {
-    private int  sizeSpam=15;
+    private int  sizeSpam=5;
     private int sizeBlock=3;
     private int timeBlock=15;
-    private int timeBetweenSpam=15;
+    private int timeBetweenSpam= 15;
 
     public int getTimeBetweenSpam() {
         return timeBetweenSpam;
@@ -42,9 +40,14 @@ public class LoginServer {
     private LoginRepository loginRepository;
     public ErrorsEnumForLogin save(LoginVo loginVo){
         ErrorsEnumForLogin e;
-        e=checkBlock(loginVo.getId(),loginVo.getDate());
+        e=checkBlock(loginVo.getUserId(),loginVo.getDate());
         if(e!=ErrorsEnumForLogin.GOOD){
             System.out.println(e);
+        }
+        e=checkSpam(loginVo.getUserId(),loginVo.getDate());
+        if(e!=ErrorsEnumForLogin.GOOD){
+            System.out.println(e);
+            return ErrorsEnumForLogin.SPAM;
         }
         LoginEntity bean= new LoginEntity();
         BeanUtils.copyProperties(loginVo,bean);
@@ -72,15 +75,20 @@ public class LoginServer {
     private ErrorsEnumForLogin checkBlock(long id,Date dateUser){
         Optional<List<LoginEntity>> user;
         user=loginRepository.getLastThree(id,getSizeBlock());
-        if(user.isPresent()){
+        if(!user.isPresent()){
             return ErrorsEnumForLogin.GOOD;
         }
         if(user.get().size()<getSizeBlock()){
             return ErrorsEnumForLogin.GOOD;
         }
+        for (int i = 0; i <user.get().size() ; i++) {
+            if(user.get().get(i).isSec()){
+                return ErrorsEnumForLogin.GOOD;
+            }
+        }
         int minutesUser=dateUser.getMinutes();
-        int minutesNow=user.get().get(2).getDate().getYear();
-        int minutes=minutesNow-minutesUser;
+        int minutesLastOfUser=user.get().get(0).getDate().getMinutes();
+        long minutes=minutesUser-minutesLastOfUser;
         if(minutes>getTimeBlock()){
             return ErrorsEnumForLogin.GOOD;
         }
@@ -88,11 +96,21 @@ public class LoginServer {
     }
     private ErrorsEnumForLogin checkSpam(long id,Date dateUser){
         Optional<List<LoginEntity>>user;
-        user=loginRepository.getSpam(id,dateUser,getTimeBetweenSpam());
-        if(user.isPresent()){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateUser);
+        cal.add(Calendar.MINUTE, -getTimeBetweenSpam());
+        Timestamp timestamp = new Timestamp(cal.getTimeInMillis());
+        user=loginRepository.getSpam(id,timestamp);
+
+        if(!user.isPresent()){
             return ErrorsEnumForLogin.GOOD;
         }
-        if(user.get().size()>getSizeSpam()){
+        for (int i = 0; i < user.get().size(); i++) {
+            if(user.get().get(i).isSec()){
+                return ErrorsEnumForLogin.GOOD;
+            }
+        }
+        if(user.get().size() > getSizeSpam()){
             return ErrorsEnumForLogin.SPAM;
         }
         return ErrorsEnumForLogin.GOOD;

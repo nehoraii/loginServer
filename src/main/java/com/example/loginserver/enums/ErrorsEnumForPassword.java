@@ -11,5 +11,6 @@ public enum ErrorsEnumForPassword {
     NotSmallChar,
     NotNumber,
     UserNotFound,
-    TheSamePassword
+    TheSamePassword,
+    PastUse
 }
