@@ -11,6 +11,9 @@ import java.util.Random;
 public class UserLogic {
 
     private static int sizeOfCode=6;
+    private static  int ageConnectUser=7;
+    private static String pathToGmailServer="http://localhost:8080/sendGmail/send";
+    private static int minLengthName=1;
 
 
     public static   ErrorsEnumForUser checkUserName(String userName){
@@ -38,7 +41,7 @@ public class UserLogic {
 
     public static ErrorsEnumForUser checkEmail(String gmail){
         ErrorsEnumForUser e;
-        e=ConToServerGmail.connectToServer("http://localhost:8080/sendGmail/send","post");
+        e=ConToServerGmail.connectToServer(pathToGmailServer,"post");
         if(e!=ErrorsEnumForUser.GOOD){
             return e;
         }
@@ -54,7 +57,7 @@ public class UserLogic {
         if(name.contains("[0-9]")){
             return ErrorsEnumForUser.ThereIsANumber;
         }
-        if(name.length()<=1){
+        if(name.length()<=minLengthName){
             return ErrorsEnumForUser.LengthError;
         }
         return ErrorsEnumForUser.GOOD;
@@ -64,7 +67,7 @@ public class UserLogic {
        int yearsUser=birthDay.getYear();
        int yearsNow=now.getYear();
         int years=yearsNow-yearsUser;
-        if(years<=7){
+        if(years<=ageConnectUser){
             return ErrorsEnumForUser.BirthDayError;
         }
         return ErrorsEnumForUser.GOOD;

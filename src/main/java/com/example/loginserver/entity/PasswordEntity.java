@@ -23,7 +23,6 @@ import java.util.Date;
 @NoArgsConstructor
 @Data
 public class PasswordEntity implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

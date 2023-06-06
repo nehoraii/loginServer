@@ -7,5 +7,7 @@ public enum ErrorsEnumForLogin {
     ReadError,
     GOOD,
     BLOCK,
-    SPAM
+    SPAM,
+    UserExistError,
+    WrongPasswordError
 }

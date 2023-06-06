@@ -1,10 +1,15 @@
 package com.example.loginserver.server;
 
 import com.example.loginserver.entity.LoginEntity;
+import com.example.loginserver.entity.PasswordEntity;
+import com.example.loginserver.entity.UserEntity;
 import com.example.loginserver.enums.ErrorsEnumForLogin;
 import com.example.loginserver.enums.ErrorsEnumForUser;
 import com.example.loginserver.repository.LoginRepository;
+import com.example.loginserver.repository.PasswordRepository;
+import com.example.loginserver.repository.UserRepository;
 import com.example.loginserver.vo.LoginVo;
+import com.example.loginserver.vo.PasswordVo;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +47,36 @@ public class LoginServer {
         ErrorsEnumForLogin e;
         e=checkBlock(loginVo.getUserId(),loginVo.getDate());
         if(e!=ErrorsEnumForLogin.GOOD){
-            System.out.println(e);
+            loginVo.setSec(false);
+            saveObject(loginVo);
+            return ErrorsEnumForLogin.BLOCK;
         }
         e=checkSpam(loginVo.getUserId(),loginVo.getDate());
         if(e!=ErrorsEnumForLogin.GOOD){
             System.out.println(e);
+            saveObject(loginVo);
             return ErrorsEnumForLogin.SPAM;
         }
+        UserEntity user;
+        user=getByUserId(loginVo.getUserId());
+        if(user==null){
+            saveObject(loginVo);
+            return ErrorsEnumForLogin.UserExistError;
+        }
+        String userPassword;
+        String loginPass;
+        PasswordEntity pass;
+        loginPass=loginVo.getPass();
+        pass=getPassByUserId(loginVo.getUserId());
+        userPassword=pass.getPass();
+        if(!loginPass.equals(userPassword)){
+            saveObject(loginVo);
+            return ErrorsEnumForLogin.WrongPasswordError;
+        }
+        e=saveObject(loginVo);
+        return e;
+    }
+    private ErrorsEnumForLogin saveObject(LoginVo loginVo){
         LoginEntity bean= new LoginEntity();
         BeanUtils.copyProperties(loginVo,bean);
         loginRepository.save(bean);
@@ -114,5 +142,18 @@ public class LoginServer {
             return ErrorsEnumForLogin.SPAM;
         }
         return ErrorsEnumForLogin.GOOD;
+    }
+    private UserEntity getByUserId(long userId){
+        Optional<UserEntity> user;
+        user=loginRepository.getUserByUserId(userId);
+        if(!user.isPresent()){
+            return null;
+        }
+        return user.get();
+    }
+    private PasswordEntity getPassByUserId(Long userId){
+        List<PasswordEntity> password;
+        password=loginRepository.getPassByUserId(userId);
+        return password.get(0);
     }
 }

@@ -1,6 +1,8 @@
 package com.example.loginserver.repository;
 
 import com.example.loginserver.entity.LoginEntity;
+import com.example.loginserver.entity.PasswordEntity;
+import com.example.loginserver.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,5 +16,10 @@ public interface LoginRepository extends JpaRepository<LoginEntity,Long> {
     Optional<List<LoginEntity>> getLastThree(long id,int sizeBLock);
     @Query(value = "SELECT * FROM login WHERE user_id = ?1 AND \"date\" >= ?2", nativeQuery = true)
     Optional<List<LoginEntity>> getSpam(long id, Timestamp timestamp);
+    @Query(value = "SELECT e FROM UserEntity e WHERE e.id=:id")
+    Optional<UserEntity>getUserByUserId(@Param("id")long id);
+    @Query(value = "SELECT e FROM PasswordEntity e where e.userId=:id order by e.date DESC ")
+    List<PasswordEntity> getPassByUserId(@Param("id") long userId);
+
 
 }
