@@ -12,5 +12,6 @@ public class LoginVo {
     private String ip;
     private boolean sec;
     private Date date;
+    private String secretCode;
 
 }

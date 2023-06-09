@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public class PasswordServer {
             return e;
         }
         PasswordEntity bean= new PasswordEntity();
+        bean.setDate(new Date());
         BeanUtils.copyProperties(passwordVo,bean);
         passwordRepository.save(bean);
         return ErrorsEnumForPassword.GOOD;
@@ -65,7 +67,8 @@ public class PasswordServer {
         if(!passwordEntity.isPresent()){
             return ErrorsEnumForPassword.UserNotFound;
         }
-        if(passwordEntity.get().get(passwordEntity.get().size()-1).getPass().equals(password)){
+        String passEntity=passwordEntity.get().get(passwordEntity.get().size()-1).getPass();
+        if(passEntity.equals(password)){
             return ErrorsEnumForPassword.TheSamePassword;
         }
         for (int i = 0; i < passwordEntity.get().size(); i++) {

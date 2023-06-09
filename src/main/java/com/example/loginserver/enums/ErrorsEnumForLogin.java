@@ -9,5 +9,6 @@ public enum ErrorsEnumForLogin {
     BLOCK,
     SPAM,
     UserExistError,
-    WrongPasswordError
+    WrongPasswordError,
+    NOT_FOUND
 }

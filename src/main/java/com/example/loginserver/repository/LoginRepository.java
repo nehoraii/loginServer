@@ -20,6 +20,7 @@ public interface LoginRepository extends JpaRepository<LoginEntity,Long> {
     Optional<UserEntity>getUserByUserId(@Param("id")long id);
     @Query(value = "SELECT e FROM PasswordEntity e where e.userId=:id order by e.date DESC ")
     List<PasswordEntity> getPassByUserId(@Param("id") long userId);
-
+    @Query(value = "SELECT * FROM login WHERE user_id=?1 AND sec=true ORDER BY id DESC LIMIT 1",nativeQuery = true)
+    Optional<LoginEntity> getLoginObjectByUserId(long userId);
 
 }

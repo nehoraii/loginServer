@@ -61,6 +61,7 @@ public class LoginServer {
         user=getByUserId(loginVo.getUserId());
         if(user==null){
             saveObject(loginVo);
+            loginVo.setSec(false);
             return ErrorsEnumForLogin.UserExistError;
         }
         String userPassword;
@@ -71,10 +72,45 @@ public class LoginServer {
         userPassword=pass.getPass();
         if(!loginPass.equals(userPassword)){
             saveObject(loginVo);
+            loginVo.setSec(false);
             return ErrorsEnumForLogin.WrongPasswordError;
         }
+        loginVo.setSec(true);
         e=saveObject(loginVo);
         return e;
+    }
+    public ErrorsEnumForLogin delete(long id){
+        Optional<LoginEntity> loginEntity=getById(id);
+        if (!loginEntity.isPresent()){
+            return ErrorsEnumForLogin.NOT_FOUND;
+        }
+        loginRepository.deleteById(id);
+        return ErrorsEnumForLogin.GOOD;
+    }
+    public ErrorsEnumForLogin update(LoginVo loginVo){
+        Optional<LoginEntity> loginEntity=getById(loginVo.getId());
+        if(!loginEntity.isPresent()){
+            return ErrorsEnumForLogin.NOT_FOUND;
+        }
+        BeanUtils.copyProperties(loginVo,loginEntity.get());
+        loginRepository.save(loginEntity.get());
+        return ErrorsEnumForLogin.GOOD;
+    }
+    public LoginVo getLoginObjectByUserId(LoginVo loginVo){
+        long userId=loginVo.getUserId();
+        Optional<LoginEntity> loginEntity;
+        try {
+
+        loginEntity=loginRepository.getLoginObjectByUserId(userId);
+        }catch (Exception e){
+            System.out.println(e);
+            return null;
+        }
+        if(!loginEntity.isPresent()){
+
+        }
+        BeanUtils.copyProperties(loginEntity.get(),loginVo);
+        return loginVo;
     }
     private ErrorsEnumForLogin saveObject(LoginVo loginVo){
         LoginEntity bean= new LoginEntity();
@@ -82,22 +118,8 @@ public class LoginServer {
         loginRepository.save(bean);
         return ErrorsEnumForLogin.GOOD;
     }
-    public long delete(long id){
-        loginRepository.deleteById(id);
-        return id;
-    }
-    public long update(LoginVo loginVo){
-        LoginEntity bean;
-        try{
-            bean=getById(loginVo.getId());
-            return bean.getId();
-        }catch (Exception e){
-            e.getMessage();
-            return -1;
-        }
-    }
-    private LoginEntity getById(long id){
-        LoginEntity user=loginRepository.findById(id).orElseThrow(()->new NoSuchElementException("Not Found!!!"));
+    private Optional<LoginEntity> getById(long id){
+        Optional<LoginEntity> user=loginRepository.findById(id);
         return user;
     }
     private ErrorsEnumForLogin checkBlock(long id,Date dateUser){

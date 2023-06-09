@@ -8,5 +8,4 @@ public class PasswordVo {
     private Long id;
     private long userId;
     private String pass;
-    private Date date;
 }

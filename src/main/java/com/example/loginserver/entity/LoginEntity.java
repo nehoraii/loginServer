@@ -44,6 +44,8 @@ public class LoginEntity implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
+    @Column(name = "secret_code")
+    private String secretCode;
 
 
 }

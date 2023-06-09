@@ -65,6 +65,12 @@ public class UserServer {
         }
         return user.get();
     }
+    public UserVO getUserByUserName(String userName){
+        UserEntity user=getByUserName(userName);
+        UserVO userVO=new UserVO();
+        BeanUtils.copyProperties(user,userVO);
+        return userVO;
+    }
     //בדיקת המשתמש בכללי בעצם קורא לכל הפונקציות
     private ErrorsEnumForUser checkUser(UserVO user){
         ErrorsEnumForUser e;

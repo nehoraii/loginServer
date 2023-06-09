@@ -1,5 +1,6 @@
 package com.example.loginserver.controller;
 
+import com.example.loginserver.entity.UserEntity;
 import com.example.loginserver.enums.ErrorsEnumForUser;
 import com.example.loginserver.logic.UserLogic;
 import com.example.loginserver.server.UserServer;
@@ -39,5 +40,10 @@ public class UserController {
     public ErrorsEnumForUser update(@RequestBody UserVO userVO){
         e=userServer.update(userVO);
         return e;
+    }
+    @PostMapping("/getUser")
+    public UserVO getUserUserName(@RequestBody UserVO userVO){
+        UserVO user=userServer.getUserByUserName(userVO.getUserName());
+        return user;
     }
 }
