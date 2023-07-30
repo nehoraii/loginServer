@@ -1,61 +1,64 @@
 package com.example.loginserver.server;
 
 import com.example.loginserver.entity.UserEntity;
-import com.example.loginserver.enums.ErrorsEnumForPassword;
-import com.example.loginserver.enums.ErrorsEnumForUser;
+import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.logic.UserLogic;
 import com.example.loginserver.repository.UserRepository;
-import org.apache.catalina.User;
+import com.example.loginserver.vo.UserVoPlusCode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.loginserver.vo.UserVO;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserServer {
     @Autowired
     private  UserRepository userRepository;
-    //private UserLogic userLogic=new UserLogic();
 
     public UserServer(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+    private static int sizeOfCode=6;
 
-    public ErrorsEnumForUser save(UserVO userVO){
-        ErrorsEnumForUser e;
-        e=checkUser(userVO);
-        if(e!=ErrorsEnumForUser.GOOD){
-            return e;
+    public UserVoPlusCode save(UserVoPlusCode userVO){
+        ErrorsEnum e;
+        UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
+        userVO=checkUser(userVO);
+        if(userVO.getE()!=ErrorsEnum.GOOD){
+            return userVoPlusCode;
         }
         String secretKey= UserLogic.getSecretKey();
         userVO.setSecretKey(secretKey);
         UserEntity bean= new UserEntity();
         BeanUtils.copyProperties(userVO,bean);
-        userRepository.save(bean);
-        return ErrorsEnumForUser.GOOD;
+        UserEntity user;
+        user=userRepository.save(bean);
+        UserLogic.copyProperty(user,userVoPlusCode);
+        userVoPlusCode.setE(ErrorsEnum.GOOD);
+        return userVoPlusCode;
 
     }
-    public ErrorsEnumForUser delete(long id){
+    public ErrorsEnum delete(long id){
         UserEntity user=getById(id);
         if(user==null){
-            return ErrorsEnumForUser.UserNotFoundError;
+            return ErrorsEnum.USER_NOT_FOUND_ERROR;
         }
         userRepository.deleteById(id);
-        return ErrorsEnumForUser.GOOD;
+        return ErrorsEnum.GOOD;
     }
-    public ErrorsEnumForUser update(UserVO userVO){
-        ErrorsEnumForUser e;
-        e=checkUserForUpdate(userVO);
-        if(e!=ErrorsEnumForUser.GOOD){
-            return e;
+    public UserVoPlusCode update(UserVoPlusCode userVO){
+        ErrorsEnum e;
+        userVO=checkUserForUpdate(userVO);
+        if(userVO.getE()!=ErrorsEnum.GOOD){
+            return userVO;
         }
         UserEntity bean=new UserEntity();
         BeanUtils.copyProperties(userVO,bean);
         userRepository.save(bean).getId();
-        return ErrorsEnumForUser.GOOD;
+        userVO.setE(ErrorsEnum.GOOD);
+        return userVO;
     }
     //בגלל שיש שאילתה ואני צריך את המשתנה server אז בניתי כאן את הפונקצייה בודקת אם קיים שם משתמש כזה
    private UserEntity getByUserName(String userName){
@@ -68,53 +71,71 @@ public class UserServer {
     public UserVO getUserByUserName(String userName){
         UserEntity user=getByUserName(userName);
         UserVO userVO=new UserVO();
+        if(user==null){
+            userVO.setE(ErrorsEnum.USER_NOT_FOUND_ERROR);
+            return userVO;
+        }
         BeanUtils.copyProperties(user,userVO);
+        userVO.setE(ErrorsEnum.GOOD);
         return userVO;
     }
     //בדיקת המשתמש בכללי בעצם קורא לכל הפונקציות
-    private ErrorsEnumForUser checkUser(UserVO user){
-        ErrorsEnumForUser e;
+    private UserVoPlusCode checkUser(UserVoPlusCode user){
+        ErrorsEnum e;
         e=checkUserIsSystem(user.getUserName());
-        if(e!=ErrorsEnumForUser.GOOD){
-            return e;
+        if(e!=ErrorsEnum.GOOD){
+            user.setE(e);
+            return user;
         }
         e=UserLogic.checkUserName(user.getUserName());
-        if(e!=ErrorsEnumForUser.GOOD){
-            return e;
+        if(e!=ErrorsEnum.GOOD){
+            user.setE(e);
+            return user;
         }
-        e=UserLogic.checkEmail(user.getEmail());
-        if(e!=ErrorsEnumForUser.GOOD){
-            return e;
+        user.setCode(UserLogic.getCodeToEmail());
+        e=UserLogic.checkEmail(user.getEmail(),user.getCode());
+        if(e!=ErrorsEnum.GOOD){
+            user.setE(e);
+            return user;
         }
         e=UserLogic.checkName(user.getName());
-        if(e!=ErrorsEnumForUser.GOOD){
-            return e;
+        if(e!=ErrorsEnum.GOOD){
+            user.setE(e);
+            return user;
         }
         e=UserLogic.checkBirthDay(user.getBirthDay());
-        return e;
+        user.setE(e);
+        return user;
     }
-    private ErrorsEnumForUser checkUserIsSystem(String userName){
+    private ErrorsEnum checkUserIsSystem(String userName){
         Optional<UserEntity> user= Optional.ofNullable(getByUserName(userName));
         if(!user.isPresent()){
-            return ErrorsEnumForUser.GOOD;
+            return ErrorsEnum.GOOD;
         }
-        return ErrorsEnumForUser.UserExistError;
+        return ErrorsEnum.USER_EXIST_ERROR;
     }
-    private ErrorsEnumForUser checkUserForUpdate(UserVO userVO){
+    private UserVoPlusCode checkUserForUpdate(UserVoPlusCode userVO){
         UserEntity user=getById(userVO.getId());
         if(user==null){
-            return ErrorsEnumForUser.UserNotFoundError;
+            userVO.setE(ErrorsEnum.USER_NOT_FOUND_ERROR);
+            return userVO;
         }
         if(userVO.equals(user)){
-            return ErrorsEnumForUser.NotChanged;
+            userVO.setE(ErrorsEnum.NOT_CHANGED);
+            return userVO;
         }
-        ErrorsEnumForUser e;
-        e=checkUser(userVO);
-        return e;
+        ErrorsEnum e;
+        userVO=checkUser(userVO);
+        return userVO;
     }
     private UserEntity getById(long id){
         UserEntity user;
         user=userRepository.getById(id);
         return user;
+    }
+    public String getSecretKey(UserVO userVO){
+        UserEntity user=userRepository.getById(userVO.getId());
+        String secretCode=user.getSecretKey();
+        return secretCode;
     }
 }

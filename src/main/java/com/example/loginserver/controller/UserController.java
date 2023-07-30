@@ -1,9 +1,8 @@
 package com.example.loginserver.controller;
 
-import com.example.loginserver.entity.UserEntity;
-import com.example.loginserver.enums.ErrorsEnumForUser;
-import com.example.loginserver.logic.UserLogic;
+import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.server.UserServer;
+import com.example.loginserver.vo.UserVoPlusCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
@@ -15,31 +14,29 @@ import com.example.loginserver.vo.UserVO;
 @Validated
 @RestController
 @RequestMapping("/User")
+@CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
     private UserServer userServer;
-    private ErrorsEnumForUser e;
-    @Bean
-    public WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> webServerFactoryCustomizer() {
-        return factory -> factory.setPort(8081);
-    }
+    private ErrorsEnum e;
 
     @PostMapping("/save")
-    public ErrorsEnumForUser addUser(@RequestBody UserVO userVO){
-        ErrorsEnumForUser e;
-        e=userServer.save(userVO);
-        return e;
+    public UserVoPlusCode addUser(@RequestBody UserVoPlusCode userVO){
+        UserVoPlusCode user;
+        user=userServer.save(userVO);
+        return user;
     }
 
     @DeleteMapping("/delete")
-    public ErrorsEnumForUser delete(@RequestBody UserVO userVO){
+    public ErrorsEnum delete(@RequestBody UserVO userVO){
         e=userServer.delete(userVO.getId());
-        return ErrorsEnumForUser.GOOD;
+        return ErrorsEnum.GOOD;
     }
     @PutMapping("/update")
-    public ErrorsEnumForUser update(@RequestBody UserVO userVO){
-        e=userServer.update(userVO);
-        return e;
+    public UserVoPlusCode update(@RequestBody UserVoPlusCode userVO){
+        UserVoPlusCode user;
+        user=userServer.update(userVO);
+        return user;
     }
     @PostMapping("/getUser")
     public UserVO getUserUserName(@RequestBody UserVO userVO){

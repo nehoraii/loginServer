@@ -1,5 +1,5 @@
 package com.example.loginserver.logic;
-import com.example.loginserver.enums.ErrorsEnumForUser;
+import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.vo.GmailVo;
 import com.google.gson.Gson;
 
@@ -14,27 +14,27 @@ import java.net.URL;
 public class ConToServerGmail {
     private static URL url;
     private static HttpURLConnection connection;
-    public  static ErrorsEnumForUser connectToServer(String path, String status){
+    public  static ErrorsEnum connectToServer(String path, String status){
         try {
             url=new URL(path);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(status.toUpperCase());
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
-            return ErrorsEnumForUser.GOOD;
+            return ErrorsEnum.GOOD;
         } catch (MalformedURLException e) {
             System.out.println(e);
-            return ErrorsEnumForUser.URLError;
+            return ErrorsEnum.URL_ERROR;
         } catch (IOException e) {
             System.out.println(e);
-            return ErrorsEnumForUser.OpenConnectionError;
+            return ErrorsEnum.OPEN_CONNECTION_ERROR;
         }catch (Exception e){
             System.out.println(e);
-            return ErrorsEnumForUser.ElseError;
+            return ErrorsEnum.ELSE_ERROR;
         }
     }
 
-    public static ErrorsEnumForUser sendToServer(String gmail,String message){
+    public static ErrorsEnum sendToServer(String gmail,String message){
         GmailVo gmailVo=new GmailVo();
         gmailVo.setMassage(message);
         gmailVo.setSendTo(gmail);
@@ -44,13 +44,13 @@ public class ConToServerGmail {
             DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
             outputStream.writeBytes(jsonString);
             outputStream.flush();
-            return ErrorsEnumForUser.GOOD;
+            return ErrorsEnum.GOOD;
         } catch (IOException e) {
             System.out.println(e);
-            return ErrorsEnumForUser.OpenConnectionError;
+            return ErrorsEnum.OPEN_CONNECTION_ERROR;
         }
     }
-    public static ErrorsEnumForUser getFromServer(){
+    public static ErrorsEnum getFromServer(){
         BufferedReader in;
         String inputLine;
         StringBuilder response = new StringBuilder();
@@ -58,7 +58,7 @@ public class ConToServerGmail {
             in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         } catch (IOException e) {
             System.out.println(e);
-            return ErrorsEnumForUser.OpenConnectionError;
+            return ErrorsEnum.OPEN_CONNECTION_ERROR;
         }
         try {
 
@@ -67,9 +67,9 @@ public class ConToServerGmail {
             }
         } catch (IOException e) {
             System.out.println(e);
-            return ErrorsEnumForUser.ReadError;
+            return ErrorsEnum.READ_ERROR;
         }
         System.out.println("answer from service:  " + response);
-        return ErrorsEnumForUser.GOOD;
+        return ErrorsEnum.GOOD;
     }
 }

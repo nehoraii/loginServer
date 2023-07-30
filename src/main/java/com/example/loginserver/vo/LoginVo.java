@@ -1,5 +1,6 @@
 package com.example.loginserver.vo;
 
+import com.example.loginserver.enums.ErrorsEnum;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,5 +14,6 @@ public class LoginVo {
     private boolean sec;
     private Date date;
     private String secretCode;
+    private ErrorsEnum e;
 
 }

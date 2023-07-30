@@ -3,19 +3,19 @@ package com.example.loginserver.server;
 import com.example.loginserver.entity.LoginEntity;
 import com.example.loginserver.entity.PasswordEntity;
 import com.example.loginserver.entity.UserEntity;
-import com.example.loginserver.enums.ErrorsEnumForLogin;
-import com.example.loginserver.enums.ErrorsEnumForUser;
+import com.example.loginserver.enums.ErrorsEnum;
+import com.example.loginserver.logic.LoginLogic;
 import com.example.loginserver.repository.LoginRepository;
-import com.example.loginserver.repository.PasswordRepository;
-import com.example.loginserver.repository.UserRepository;
 import com.example.loginserver.vo.LoginVo;
-import com.example.loginserver.vo.PasswordVo;
-import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -43,26 +43,27 @@ public class LoginServer {
 
     @Autowired
     private LoginRepository loginRepository;
-    public ErrorsEnumForLogin save(LoginVo loginVo){
-        ErrorsEnumForLogin e;
+    public ErrorsEnum save(LoginVo loginVo){
+        ErrorsEnum e;
+        loginVo.setDate(new Date());
         e=checkBlock(loginVo.getUserId(),loginVo.getDate());
-        if(e!=ErrorsEnumForLogin.GOOD){
+        if(e!= ErrorsEnum.GOOD){
             loginVo.setSec(false);
             saveObject(loginVo);
-            return ErrorsEnumForLogin.BLOCK;
+            return ErrorsEnum.BLOCK;
         }
         e=checkSpam(loginVo.getUserId(),loginVo.getDate());
-        if(e!=ErrorsEnumForLogin.GOOD){
+        if(e!=ErrorsEnum.GOOD){
             System.out.println(e);
             saveObject(loginVo);
-            return ErrorsEnumForLogin.SPAM;
+            return ErrorsEnum.SPAM;
         }
         UserEntity user;
         user=getByUserId(loginVo.getUserId());
         if(user==null){
             saveObject(loginVo);
             loginVo.setSec(false);
-            return ErrorsEnumForLogin.UserExistError;
+            return ErrorsEnum.USER_NOT_FOUND_ERROR;
         }
         String userPassword;
         String loginPass;
@@ -73,28 +74,37 @@ public class LoginServer {
         if(!loginPass.equals(userPassword)){
             saveObject(loginVo);
             loginVo.setSec(false);
-            return ErrorsEnumForLogin.WrongPasswordError;
+            return ErrorsEnum.WRONG_PASS_ERROR;
         }
         loginVo.setSec(true);
         e=saveObject(loginVo);
         return e;
     }
-    public ErrorsEnumForLogin delete(long id){
+    public ErrorsEnum delete(long id){
         Optional<LoginEntity> loginEntity=getById(id);
         if (!loginEntity.isPresent()){
-            return ErrorsEnumForLogin.NOT_FOUND;
+            return ErrorsEnum.NOT_FOUND;
         }
         loginRepository.deleteById(id);
-        return ErrorsEnumForLogin.GOOD;
+        return ErrorsEnum.GOOD;
     }
-    public ErrorsEnumForLogin update(LoginVo loginVo){
+    public ErrorsEnum update(LoginVo loginVo){
         Optional<LoginEntity> loginEntity=getById(loginVo.getId());
         if(!loginEntity.isPresent()){
-            return ErrorsEnumForLogin.NOT_FOUND;
+            return ErrorsEnum.NOT_FOUND;
+        }
+        UserEntity user=getByUserId(loginVo.getUserId());
+        String secretCodeRight=LoginLogic.getTOTPCode(user.getSecretKey());
+        String secretCodeUser=loginVo.getSecretCode();
+        if(!secretCodeUser.equals(secretCodeRight)){
+            loginVo.setSec(false);
+            BeanUtils.copyProperties(loginVo,loginEntity.get());
+            loginRepository.save(loginEntity.get());
+            return ErrorsEnum.SECRET_CODE_ERROR;
         }
         BeanUtils.copyProperties(loginVo,loginEntity.get());
         loginRepository.save(loginEntity.get());
-        return ErrorsEnumForLogin.GOOD;
+        return ErrorsEnum.GOOD;
     }
     public LoginVo getLoginObjectByUserId(LoginVo loginVo){
         long userId=loginVo.getUserId();
@@ -112,39 +122,44 @@ public class LoginServer {
         BeanUtils.copyProperties(loginEntity.get(),loginVo);
         return loginVo;
     }
-    private ErrorsEnumForLogin saveObject(LoginVo loginVo){
+    private ErrorsEnum saveObject(LoginVo loginVo){
         LoginEntity bean= new LoginEntity();
         BeanUtils.copyProperties(loginVo,bean);
         loginRepository.save(bean);
-        return ErrorsEnumForLogin.GOOD;
+        return ErrorsEnum.GOOD;
     }
     private Optional<LoginEntity> getById(long id){
         Optional<LoginEntity> user=loginRepository.findById(id);
         return user;
     }
-    private ErrorsEnumForLogin checkBlock(long id,Date dateUser){
+    private ErrorsEnum checkBlock(long id,Date dateUser){
         Optional<List<LoginEntity>> user;
         user=loginRepository.getLastThree(id,getSizeBlock());
         if(!user.isPresent()){
-            return ErrorsEnumForLogin.GOOD;
+            return ErrorsEnum.GOOD;
         }
         if(user.get().size()<getSizeBlock()){
-            return ErrorsEnumForLogin.GOOD;
+            return ErrorsEnum.GOOD;
         }
         for (int i = 0; i <user.get().size() ; i++) {
             if(user.get().get(i).isSec()){
-                return ErrorsEnumForLogin.GOOD;
+                return ErrorsEnum.GOOD;
             }
         }
-        int minutesUser=dateUser.getMinutes();
-        int minutesLastOfUser=user.get().get(0).getDate().getMinutes();
-        long minutes=minutesUser-minutesLastOfUser;
-        if(minutes>getTimeBlock()){
-            return ErrorsEnumForLogin.GOOD;
+        Instant instant = dateUser.toInstant();
+        LocalDateTime localDateTimeUser = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        Instant instant2 = user.get().get(0).getDate().toInstant();
+        LocalDateTime localDateTimeLastOfUser = LocalDateTime.ofInstant(instant2, ZoneId.systemDefault());
+        long minutesBetween = ChronoUnit.MINUTES.between(localDateTimeUser, localDateTimeLastOfUser);
+//        int minutesUser=dateUser.getMinutes();
+//        int minutesLastOfUser=user.get().get(0).getDate().getMinutes();
+//        long minutes=minutesUser-minutesLastOfUser;
+        if(minutesBetween>getTimeBlock()){
+            return ErrorsEnum.GOOD;
         }
-        return ErrorsEnumForLogin.BLOCK;
+        return ErrorsEnum.BLOCK;
     }
-    private ErrorsEnumForLogin checkSpam(long id,Date dateUser){
+    private ErrorsEnum checkSpam(long id,Date dateUser){
         Optional<List<LoginEntity>>user;
         Calendar cal = Calendar.getInstance();
         cal.setTime(dateUser);
@@ -153,17 +168,17 @@ public class LoginServer {
         user=loginRepository.getSpam(id,timestamp);
 
         if(!user.isPresent()){
-            return ErrorsEnumForLogin.GOOD;
+            return ErrorsEnum.GOOD;
         }
         for (int i = 0; i < user.get().size(); i++) {
             if(user.get().get(i).isSec()){
-                return ErrorsEnumForLogin.GOOD;
+                return ErrorsEnum.GOOD;
             }
         }
         if(user.get().size() > getSizeSpam()){
-            return ErrorsEnumForLogin.SPAM;
+            return ErrorsEnum.SPAM;
         }
-        return ErrorsEnumForLogin.GOOD;
+        return ErrorsEnum.GOOD;
     }
     private UserEntity getByUserId(long userId){
         Optional<UserEntity> user;

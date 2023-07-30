@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.Date;
 @Data
-public class UserVO {
+public class UserVoPlusCode {
     private Long id;
     private String name;
     private String secName;
@@ -14,7 +14,6 @@ public class UserVO {
     private String userName;
     private Date birthDay;
     private String secretKey;
-    private ErrorsEnum e;
-
-
+    private String code;
+    ErrorsEnum e;
 }

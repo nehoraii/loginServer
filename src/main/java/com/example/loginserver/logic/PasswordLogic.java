@@ -1,31 +1,31 @@
 package com.example.loginserver.logic;
 
-import com.example.loginserver.enums.ErrorsEnumForPassword;
+import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.vo.PasswordVo;
 
 public class PasswordLogic {
-    private static ErrorsEnumForPassword checkLength(String password){
+    private static ErrorsEnum checkLength(String password){
         if(password.length()<8 && password.length()>16){
-            return ErrorsEnumForPassword.LengthErrorPassword;
+            return ErrorsEnum.LENGTH_ERROR;
         }
-        return ErrorsEnumForPassword.GOOD;
+        return ErrorsEnum.GOOD;
     }
-    private static ErrorsEnumForPassword checkChars(String password){
+    private static ErrorsEnum checkChars(String password){
         if(!password.matches(".*[A-Z]*.")){
-            return ErrorsEnumForPassword.NotBigChar;
+            return ErrorsEnum.NOT_BIG_CHAR;
         }
         if(!password.matches(".*[a-z]*.")){
-            return ErrorsEnumForPassword.NotSmallChar;
+            return ErrorsEnum.NOT_SMALL_CHAR;
         }
         if(!password.matches(".*[0-9]*.")){
-            return ErrorsEnumForPassword.NotNumber;
+            return ErrorsEnum.NOT_NUMBER;
         }
-        return ErrorsEnumForPassword.GOOD;
+        return ErrorsEnum.GOOD;
     }
-    public static ErrorsEnumForPassword checkPassObject(PasswordVo passwordVo){
-        ErrorsEnumForPassword e;
+    public static ErrorsEnum checkPassObject(PasswordVo passwordVo){
+        ErrorsEnum e;
         e=checkLength(passwordVo.getPass());
-        if(e!=ErrorsEnumForPassword.GOOD){
+        if(e!=ErrorsEnum.GOOD){
             return e;
         }
         e=checkChars(passwordVo.getPass());

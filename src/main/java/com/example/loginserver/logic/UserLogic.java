@@ -1,5 +1,7 @@
 package com.example.loginserver.logic;
-import com.example.loginserver.enums.ErrorsEnumForUser;
+import com.example.loginserver.entity.UserEntity;
+import com.example.loginserver.enums.ErrorsEnum;
+import com.example.loginserver.vo.UserVoPlusCode;
 import org.apache.commons.codec.binary.Base32;
 
 import java.security.SecureRandom;
@@ -16,61 +18,50 @@ public class UserLogic {
     private static int minLengthName=1;
 
 
-    public static   ErrorsEnumForUser checkUserName(String userName){
+    public static ErrorsEnum checkUserName(String userName){
         if(!userName.matches(".*[A-Z].*")){
-            return ErrorsEnumForUser.NotBigSmallCapsError;
+            return ErrorsEnum.NOT_BIG_CAPS_ERROR;
         }
         if(!userName.matches(".*[a-z].*")){
-            return ErrorsEnumForUser.NotSmallCapsError;
+            return ErrorsEnum.NOT_SMALL_CAPS_ERROR;
         }
         if(userName.length()<8||userName.length()>16){
-            return ErrorsEnumForUser.LengthError;
+            return ErrorsEnum.LENGTH_ERROR;
         }
-        return ErrorsEnumForUser.GOOD;
-    }
-    public  static String getCodeToGmail(){
-        Random random=new Random();
-        String code="";
-        String codeNow="";
-        for (int i = 0; i <sizeOfCode ; i++) {
-            codeNow=String.valueOf(random.nextInt(10));
-            code+=codeNow;
-        }
-        return code;
+        return ErrorsEnum.GOOD;
     }
 
-    public static ErrorsEnumForUser checkEmail(String gmail){
-        ErrorsEnumForUser e;
-        e=ConToServerGmail.connectToServer(pathToGmailServer,"post");
-        if(e!=ErrorsEnumForUser.GOOD){
+    public static ErrorsEnum checkEmail(String gmail,String code){
+        ErrorsEnum e;
+        e=ConToServerGmail.connectToServer(pathToGmailServer,"POST");
+        if(e!=ErrorsEnum.GOOD){
             return e;
         }
-        String code=getCodeToGmail();
         e=ConToServerGmail.sendToServer(gmail,code);
-        if(e!=ErrorsEnumForUser.GOOD){
+        if(e!=ErrorsEnum.GOOD){
             return e;
         }
         e=ConToServerGmail.getFromServer();
         return e;
     }
-    public static    ErrorsEnumForUser checkName(String name){
+    public static    ErrorsEnum checkName(String name){
         if(name.contains("[0-9]")){
-            return ErrorsEnumForUser.ThereIsANumber;
+            return ErrorsEnum.THERE_IS_NUMBER;
         }
         if(name.length()<=minLengthName){
-            return ErrorsEnumForUser.LengthError;
+            return ErrorsEnum.LENGTH_ERROR;
         }
-        return ErrorsEnumForUser.GOOD;
+        return ErrorsEnum.GOOD;
     }
-    public static ErrorsEnumForUser checkBirthDay(Date birthDay){
+    public static ErrorsEnum checkBirthDay(Date birthDay){
         LocalDate now=LocalDate.now();
        int yearsUser=birthDay.getYear();
        int yearsNow=now.getYear();
         int years=yearsNow-yearsUser;
         if(years<=ageConnectUser){
-            return ErrorsEnumForUser.BirthDayError;
+            return ErrorsEnum.BIRTH_DAY_ERROR;
         }
-        return ErrorsEnumForUser.GOOD;
+        return ErrorsEnum.GOOD;
     }
     public static String getSecretKey(){
         SecureRandom random = new SecureRandom();
@@ -79,5 +70,23 @@ public class UserLogic {
         Base32 base32 = new Base32();
         return base32.encodeToString(bytes);
 
+    }
+    public static void copyProperty(UserEntity from, UserVoPlusCode to){
+        to.setId(from.getId());
+        to.setName(from.getName());
+        to.setEmail(from.getEmail());
+        to.setSecretKey(from.getSecretKey());
+        to.setPhone(from.getPhone());
+        to.setSecName(from.getSecName());
+        to.setUserName(from.getUserName());
+        to.setBirthDay(from.getBirthDay());
+    }
+    public static String getCodeToEmail(){
+        String code="";
+        Random random=new Random();
+        for (int i = 0; i <sizeOfCode ; i++) {
+            code+=random.nextInt(10);
+        }
+        return code;
     }
 }
