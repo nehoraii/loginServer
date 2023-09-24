@@ -16,11 +16,11 @@ public class LoginController {
     @Autowired
     private LoginServer loginServer;
     @PostMapping("/save")
-    public ErrorsEnum save(@RequestBody LoginVo loginVo, HttpServletRequest request){
+    public LoginVo save(@RequestBody LoginVo loginVo, HttpServletRequest request){
         loginVo.setIp(request.getRemoteAddr());
-        ErrorsEnum e;
-        e=loginServer.save(loginVo);
-        return e;
+        LoginVo loginVo1;
+        loginVo1=loginServer.save(loginVo);
+        return loginVo1;
     }
     @DeleteMapping("/delete")
     public ErrorsEnum delete(@RequestBody LoginVo loginVo){
@@ -34,5 +34,11 @@ public class LoginController {
     public LoginVo getLoginObjectByUserName(@RequestBody LoginVo loginVo){
         loginVo=loginServer.getLoginObjectByUserId(loginVo);
         return loginVo;
+    }
+    @PostMapping("/conSecretCode")
+    public LoginVo conSecretCode(@RequestBody LoginVo loginVo){
+        LoginVo login;
+        login=loginServer.checkSecretCode(loginVo);
+        return login;
     }
 }

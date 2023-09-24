@@ -67,6 +67,9 @@ public class PasswordServer {
         if(!passwordEntity.isPresent()){
             return ErrorsEnum.USER_NOT_FOUND_ERROR;
         }
+        if(passwordEntity.get().size()==0){
+            return ErrorsEnum.GOOD;
+        }
         String passEntity=passwordEntity.get().get(passwordEntity.get().size()-1).getPass();
         if(passEntity.equals(password)){
             return ErrorsEnum.THE_SAME_PASSWORD;

@@ -24,5 +24,6 @@ public enum ErrorsEnum {
     NOT_SMALL_CHAR,
     NOT_NUMBER,
     THE_SAME_PASSWORD,
-    PAST_USE
+    PAST_USE,
+    SEND_GMAIL_ERROR
 }

@@ -15,5 +15,5 @@ public class UserVoPlusCode {
     private Date birthDay;
     private String secretKey;
     private String code;
-    ErrorsEnum e;
+    private ErrorsEnum e;
 }

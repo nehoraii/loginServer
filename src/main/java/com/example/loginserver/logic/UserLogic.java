@@ -42,6 +42,17 @@ public class UserLogic {
             return e;
         }
         e=ConToServerGmail.getFromServer();
+        if(e!=ErrorsEnum.GOOD){
+            return e;
+        }
+        boolean answer;
+        answer=ConToServerGmail.getAnswer();
+        if(answer){
+            e=ErrorsEnum.GOOD;
+        }
+        else{
+            e=ErrorsEnum.SEND_GMAIL_ERROR;
+        }
         return e;
     }
     public static    ErrorsEnum checkName(String name){
@@ -80,6 +91,17 @@ public class UserLogic {
         to.setSecName(from.getSecName());
         to.setUserName(from.getUserName());
         to.setBirthDay(from.getBirthDay());
+    }
+    public static void copyProperty(UserEntity from, UserVoPlusCode to,String code){
+        to.setId(from.getId());
+        to.setName(from.getName());
+        to.setEmail(from.getEmail());
+        to.setSecretKey(from.getSecretKey());
+        to.setPhone(from.getPhone());
+        to.setSecName(from.getSecName());
+        to.setUserName(from.getUserName());
+        to.setBirthDay(from.getBirthDay());
+        to.setCode(code);
     }
     public static String getCodeToEmail(){
         String code="";

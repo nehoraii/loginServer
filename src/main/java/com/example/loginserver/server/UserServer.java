@@ -2,6 +2,7 @@ package com.example.loginserver.server;
 
 import com.example.loginserver.entity.UserEntity;
 import com.example.loginserver.enums.ErrorsEnum;
+import com.example.loginserver.logic.Security;
 import com.example.loginserver.logic.UserLogic;
 import com.example.loginserver.repository.UserRepository;
 import com.example.loginserver.vo.UserVoPlusCode;
@@ -17,16 +18,11 @@ public class UserServer {
     @Autowired
     private  UserRepository userRepository;
 
-    public UserServer(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-    private static int sizeOfCode=6;
-
     public UserVoPlusCode save(UserVoPlusCode userVO){
-        ErrorsEnum e;
         UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
         userVO=checkUser(userVO);
         if(userVO.getE()!=ErrorsEnum.GOOD){
+            userVoPlusCode.setE(userVO.getE());
             return userVoPlusCode;
         }
         String secretKey= UserLogic.getSecretKey();
@@ -35,7 +31,7 @@ public class UserServer {
         BeanUtils.copyProperties(userVO,bean);
         UserEntity user;
         user=userRepository.save(bean);
-        UserLogic.copyProperty(user,userVoPlusCode);
+        UserLogic.copyProperty(user,userVoPlusCode,userVO.getCode());
         userVoPlusCode.setE(ErrorsEnum.GOOD);
         return userVoPlusCode;
 
@@ -69,13 +65,14 @@ public class UserServer {
         return user.get();
     }
     public UserVO getUserByUserName(String userName){
+        userName= Security.decipherFromClientForUser(userName);
         UserEntity user=getByUserName(userName);
         UserVO userVO=new UserVO();
         if(user==null){
             userVO.setE(ErrorsEnum.USER_NOT_FOUND_ERROR);
             return userVO;
         }
-        BeanUtils.copyProperties(user,userVO);
+        userVO.setId(user.getId());
         userVO.setE(ErrorsEnum.GOOD);
         return userVO;
     }
@@ -133,8 +130,8 @@ public class UserServer {
         user=userRepository.getById(id);
         return user;
     }
-    public String getSecretKey(UserVO userVO){
-        UserEntity user=userRepository.getById(userVO.getId());
+    public String getSecretKey(Long userId){
+        UserEntity user=userRepository.getById(userId);
         String secretCode=user.getSecretKey();
         return secretCode;
     }

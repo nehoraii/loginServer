@@ -13,6 +13,7 @@ import java.net.URL;
 
 public class ConToServerGmail {
     private static URL url;
+    private static boolean answer;
     private static HttpURLConnection connection;
     public  static ErrorsEnum connectToServer(String path, String status){
         try {
@@ -69,7 +70,17 @@ public class ConToServerGmail {
             System.out.println(e);
             return ErrorsEnum.READ_ERROR;
         }
+        String resString=response.toString();
+        if(resString.equals("true")){
+            answer=true;
+        }
+        else {
+            answer=false;
+        }
         System.out.println("answer from service:  " + response);
         return ErrorsEnum.GOOD;
+    }
+    public static boolean getAnswer(){
+        return answer;
     }
 }
