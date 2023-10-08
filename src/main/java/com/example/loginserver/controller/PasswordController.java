@@ -21,17 +21,5 @@ public class PasswordController {
         e=passwordServer.save(passwordVo);
         return e;
     }
-    @DeleteMapping("/delete")
-    public ErrorsEnum delete(PasswordVo passwordVo){
-        ErrorsEnum e;
-        e=passwordServer.delete(passwordVo.getId());
-        return e;
-    }
-    @PutMapping("/update")
-    public ErrorsEnum update(@RequestBody PasswordVo passwordVo){
-        ErrorsEnum e;
-        e=passwordServer.update(passwordVo);
-        return e;
-    }
 
 }

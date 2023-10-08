@@ -21,26 +21,22 @@ public class UserController {
     private ErrorsEnum e;
 
     @PostMapping("/save")
-    public UserVoPlusCode addUser(@RequestBody UserVoPlusCode userVO){
+    public UserVoPlusCode addUser(@RequestBody UserVO userVO){
         UserVoPlusCode user;
         user=userServer.save(userVO);
         return user;
     }
-
-    @DeleteMapping("/delete")
-    public ErrorsEnum delete(@RequestBody UserVO userVO){
-        e=userServer.delete(userVO.getId());
-        return ErrorsEnum.GOOD;
-    }
-    @PutMapping("/update")
+   /* @PutMapping("/update")
     public UserVoPlusCode update(@RequestBody UserVoPlusCode userVO){
         UserVoPlusCode user;
         user=userServer.update(userVO);
         return user;
     }
+
+    */
     @PostMapping("/getUser")
     public UserVO getUserUserName(@RequestBody UserVO userVO){
-        UserVO user=userServer.getUserByUserName(userVO.getUserName());
+        UserVO user=userServer.getUserByUserName(userVO);
         return user;
     }
 }

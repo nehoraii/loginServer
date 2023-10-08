@@ -8,6 +8,7 @@ import com.example.loginserver.logic.LoginLogic;
 import com.example.loginserver.logic.Security;
 import com.example.loginserver.repository.LoginRepository;
 import com.example.loginserver.vo.LoginVo;
+import com.example.loginserver.vo.UserVoPlusCode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import java.util.*;
 @Service
 public class LoginServer {
     private int  sizeSpam=50;
-    private int sizeBlock=3;
+    private int sizeBlock=45;//change to 3
     private int timeBlock=15;
     private int timeBetweenSpam= 15;
     @Autowired
@@ -47,6 +48,8 @@ public class LoginServer {
     @Autowired
     private LoginRepository loginRepository;
     public LoginVo save(LoginVo loginVo){
+        String decipherPass=Security.decipherFromClientForPass(loginVo.getPass());
+        loginVo.setPass(decipherPass);
         ErrorsEnum e;
         LoginVo loginVoFun;
         loginVo.setDate(new Date());
@@ -54,12 +57,18 @@ public class LoginServer {
         if(e!=ErrorsEnum.GOOD){
             System.out.println(e);
             loginVoFun=saveObject(loginVo);
+            String passToDB;
+            passToDB=Security.encodeToDBPass(loginVo.getPass());
+            loginVo.setPass(passToDB);
             loginVoFun.setE(ErrorsEnum.SPAM);
             return loginVoFun;
         }
         e=checkBlock(loginVo.getUserId(),loginVo.getDate());
         if(e!= ErrorsEnum.GOOD){
             loginVo.setSec(false);
+            String passToDB;
+            passToDB=Security.encodeToDBPass(loginVo.getPass());
+            loginVo.setPass(passToDB);
             loginVoFun=saveObject(loginVo);
             loginVoFun.setE(ErrorsEnum.BLOCK);
             return loginVoFun;
@@ -67,43 +76,44 @@ public class LoginServer {
         UserEntity user;
         user=getByUserId(loginVo.getUserId());
         if(user==null){
+            String passToDB;
+            passToDB=Security.encodeToDBPass(loginVo.getPass());
+            loginVo.setPass(passToDB);
             loginVoFun=saveObject(loginVo);
             loginVo.setSec(false);
             loginVoFun.setE(ErrorsEnum.USER_NOT_FOUND_ERROR);
             return loginVoFun;
         }
-        String userPassword;
         String loginPass;
         PasswordEntity pass;
-        loginPass= Security.decipherFromClientForPass(loginVo.getPass());
+        loginPass= loginVo.getPass();
         pass=getPassByUserId(loginVo.getUserId());
-        userPassword=pass.getPass();
-        if(!loginPass.equals(userPassword)){
-            loginVoFun=saveObject(loginVo);
+        String userPass;
+        userPass=Security.decipherFromDBPass(pass.getPass());
+        if(!loginPass.equals(userPass)){
+            String passToDB;
+            passToDB=Security.encodeToDBPass(loginVo.getPass());
+            loginVo.setPass(passToDB);
             loginVo.setSec(false);
+            loginVoFun=saveObject(loginVo);
             loginVoFun.setE(ErrorsEnum.WRONG_PASS_ERROR);
             return loginVoFun;
         }
         loginVo.setSec(true);
-        loginVo.setPass(userPassword);
+        String passToDB;
+        passToDB=Security.encodeToDBPass(loginVo.getPass());
+        loginVo.setPass(passToDB);
         loginVoFun=saveObject(loginVo);
         loginVoFun.setE(ErrorsEnum.GOOD);
         return loginVoFun;
     }
-    public ErrorsEnum delete(long id){
-        Optional<LoginEntity> loginEntity=getById(id);
-        if (!loginEntity.isPresent()){
-            return ErrorsEnum.NOT_FOUND;
-        }
-        loginRepository.deleteById(id);
-        return ErrorsEnum.GOOD;
-    }
-    public ErrorsEnum update(LoginVo loginVo){
+    private ErrorsEnum updateToSecretKey(LoginVo loginVo){
         Optional<LoginEntity> loginEntity=getById(loginVo.getId());
         if(!loginEntity.isPresent()){
             return ErrorsEnum.NOT_FOUND;
         }
         loginEntity.get().setSecretCode(loginVo.getSecretCode());
+        loginEntity.get().setSec(loginVo.isSec());
         loginRepository.save(loginEntity.get());
         return ErrorsEnum.GOOD;
     }
@@ -118,8 +128,9 @@ public class LoginServer {
             return null;
         }
         if(!loginEntity.isPresent()){
-
+            return null;
         }
+        loginEntity.get().setPass(loginEntity.get().getPass());
         BeanUtils.copyProperties(loginEntity.get(),loginVo);
         return loginVo;
     }
@@ -198,15 +209,21 @@ public class LoginServer {
     }
     public LoginVo checkSecretCode(LoginVo loginVo){
         String key=userServer.getSecretKey(loginVo.getUserId());
+        UserEntity userEntity=new UserEntity();
+        userEntity.setSecretKey(key);
+        Security.decipherUserObjectFromDB(userEntity);
+        key=userEntity.getSecretKey();
         String code=LoginLogic.getTOTPCode(key);
         if(code.equals(loginVo.getSecretCode())){
             loginVo.setE(ErrorsEnum.GOOD);
-            update(loginVo);
+            loginVo.setSec(true);
+            updateToSecretKey(loginVo);
             return loginVo;
         }
         else {
+            loginVo.setSec(false);
             loginVo.setE(ErrorsEnum.SECRET_CODE_ERROR);
-            update(loginVo);
+            updateToSecretKey(loginVo);
         }
         return loginVo;
     }

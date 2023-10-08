@@ -4,6 +4,7 @@ package com.example.loginserver.server;
 import com.example.loginserver.entity.PasswordEntity;
 import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.logic.PasswordLogic;
+import com.example.loginserver.logic.Security;
 import com.example.loginserver.repository.PasswordRepository;
 import com.example.loginserver.vo.PasswordVo;
 import org.springframework.beans.BeanUtils;
@@ -20,12 +21,10 @@ public class PasswordServer {
     @Autowired
     private PasswordRepository passwordRepository;
 
-    public PasswordServer(PasswordRepository passwordRepository) {
-        this.passwordRepository = passwordRepository;
-    }
-
     public ErrorsEnum save(PasswordVo passwordVo){
         ErrorsEnum e;
+        String decPass=Security.decipherFromClientForPass(passwordVo.getPass());
+        passwordVo.setPass(decPass);
         e=changePassForUpdate(passwordVo.getUserId(),passwordVo.getPass());
         if(e!=ErrorsEnum.GOOD){
             return e;
@@ -37,29 +36,11 @@ public class PasswordServer {
         PasswordEntity bean= new PasswordEntity();
         bean.setDate(new Date());
         BeanUtils.copyProperties(passwordVo,bean);
+        String passToDB;
+        passToDB=Security.encodeToDBPass(bean.getPass());
+        bean.setPass(passToDB);
         passwordRepository.save(bean);
         return ErrorsEnum.GOOD;
-    }
-
-    public ErrorsEnum delete(long id){
-        passwordRepository.deleteById(id);
-        return ErrorsEnum.GOOD;
-    }
-    public ErrorsEnum update(PasswordVo passwordVo){
-        ErrorsEnum e;
-        e=changePassForUpdate(passwordVo.getUserId(),passwordVo.getPass());
-        if(e!=ErrorsEnum.GOOD){
-            return e;
-        }
-        PasswordEntity bean;
-        bean=geyById(passwordVo.getId());
-        BeanUtils.copyProperties(passwordVo,bean);
-        passwordRepository.save(bean);
-        return ErrorsEnum.GOOD;
-    }
-    private PasswordEntity geyById(long id){
-        PasswordEntity user=passwordRepository.findById(id).orElseThrow(()->new NoSuchElementException("Not Found!!!"));
-        return user;
     }
     private ErrorsEnum changePassForUpdate(long id,String password){
         Optional<List<PasswordEntity>> passwordEntity;

@@ -6,6 +6,7 @@ import com.example.loginserver.logic.Security;
 import com.example.loginserver.logic.UserLogic;
 import com.example.loginserver.repository.UserRepository;
 import com.example.loginserver.vo.UserVoPlusCode;
+import org.apache.catalina.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,56 +18,61 @@ import java.util.Optional;
 public class UserServer {
     @Autowired
     private  UserRepository userRepository;
-
-    public UserVoPlusCode save(UserVoPlusCode userVO){
-        UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
-        userVO=checkUser(userVO);
-        if(userVO.getE()!=ErrorsEnum.GOOD){
-            userVoPlusCode.setE(userVO.getE());
+    public UserVoPlusCode save(UserVO userVO){
+        Security.decipherUserObjectFromClient(userVO);
+        UserVoPlusCode userVoPlusCode;
+        userVoPlusCode=checkUser(userVO);
+        if(userVoPlusCode.getE()!=ErrorsEnum.GOOD){
+            Security.encodeUserObjectToClient(userVoPlusCode);
             return userVoPlusCode;
         }
+
         String secretKey= UserLogic.getSecretKey();
-        userVO.setSecretKey(secretKey);
+        System.out.println(secretKey);
+        userVoPlusCode.setSecretKey(secretKey);
         UserEntity bean= new UserEntity();
-        BeanUtils.copyProperties(userVO,bean);
+        BeanUtils.copyProperties(userVoPlusCode,bean);
         UserEntity user;
+        Security.encodeUserObjectToDB(bean);
         user=userRepository.save(bean);
-        UserLogic.copyProperty(user,userVoPlusCode,userVO.getCode());
+        Security.decipherUserObjectFromDB(user);
+        UserLogic.copyProperty(user,userVoPlusCode);
         userVoPlusCode.setE(ErrorsEnum.GOOD);
+        Security.encodeUserObjectToClient(userVoPlusCode);
         return userVoPlusCode;
 
     }
-    public ErrorsEnum delete(long id){
-        UserEntity user=getById(id);
-        if(user==null){
-            return ErrorsEnum.USER_NOT_FOUND_ERROR;
-        }
-        userRepository.deleteById(id);
-        return ErrorsEnum.GOOD;
-    }
-    public UserVoPlusCode update(UserVoPlusCode userVO){
+    /*public UserVoPlusCode update(UserVO userVO){
         ErrorsEnum e;
-        userVO=checkUserForUpdate(userVO);
-        if(userVO.getE()!=ErrorsEnum.GOOD){
-            return userVO;
+        UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
+        BeanUtils.copyProperties(userVO,userVoPlusCode);
+        userVoPlusCode=checkUserForUpdate(userVO);
+        if(userVoPlusCode.getE()!=ErrorsEnum.GOOD){
+            return userVoPlusCode;
         }
         UserEntity bean=new UserEntity();
-        BeanUtils.copyProperties(userVO,bean);
+        BeanUtils.copyProperties(userVoPlusCode,bean);
         userRepository.save(bean).getId();
         userVO.setE(ErrorsEnum.GOOD);
         return userVO;
     }
+
+     */
     //בגלל שיש שאילתה ואני צריך את המשתנה server אז בניתי כאן את הפונקצייה בודקת אם קיים שם משתמש כזה
    private UserEntity getByUserName(String userName){
-        Optional<UserEntity> user=userRepository.getByUserName(userName);
+       UserEntity userEntity=new UserEntity();
+       userEntity.setUserName(userName);
+       Security.encodeUserObjectToDB(userEntity);
+        Optional<UserEntity> user=userRepository.getByUserName(userEntity.getUserName());
         if(!user.isPresent()){
             return null;
         }
+        Security.decipherUserObjectFromDB(user.get());
         return user.get();
     }
-    public UserVO getUserByUserName(String userName){
-        userName= Security.decipherFromClientForUser(userName);
-        UserEntity user=getByUserName(userName);
+    public UserVO getUserByUserName(UserVO userVo){
+        Security.decipherUserObjectFromClient(userVo);
+        UserEntity user=getByUserName(userVo.getUserName());
         UserVO userVO=new UserVO();
         if(user==null){
             userVO.setE(ErrorsEnum.USER_NOT_FOUND_ERROR);
@@ -77,32 +83,34 @@ public class UserServer {
         return userVO;
     }
     //בדיקת המשתמש בכללי בעצם קורא לכל הפונקציות
-    private UserVoPlusCode checkUser(UserVoPlusCode user){
+    private UserVoPlusCode checkUser(UserVO user){
         ErrorsEnum e;
-        e=checkUserIsSystem(user.getUserName());
+        UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
+        BeanUtils.copyProperties(user,userVoPlusCode);
+        e=checkUserIsSystem(userVoPlusCode.getUserName());
         if(e!=ErrorsEnum.GOOD){
-            user.setE(e);
-            return user;
+            userVoPlusCode.setE(e);
+            return userVoPlusCode;
         }
-        e=UserLogic.checkUserName(user.getUserName());
+        e=UserLogic.checkUserName(userVoPlusCode.getUserName());
         if(e!=ErrorsEnum.GOOD){
-            user.setE(e);
-            return user;
+            userVoPlusCode.setE(e);
+            return userVoPlusCode;
         }
-        user.setCode(UserLogic.getCodeToEmail());
-        e=UserLogic.checkEmail(user.getEmail(),user.getCode());
+        userVoPlusCode.setCode(UserLogic.getCodeToEmail());
+        e=UserLogic.checkEmail(userVoPlusCode.getEmail(),userVoPlusCode.getCode());
         if(e!=ErrorsEnum.GOOD){
-            user.setE(e);
-            return user;
+            userVoPlusCode.setE(e);
+            return userVoPlusCode;
         }
-        e=UserLogic.checkName(user.getName());
+        e=UserLogic.checkName(userVoPlusCode.getName());
         if(e!=ErrorsEnum.GOOD){
-            user.setE(e);
-            return user;
+            userVoPlusCode.setE(e);
+            return userVoPlusCode;
         }
-        e=UserLogic.checkBirthDay(user.getBirthDay());
-        user.setE(e);
-        return user;
+        e=UserLogic.checkBirthDay(userVoPlusCode.getBirthDay());
+        userVoPlusCode.setE(e);
+        return userVoPlusCode;
     }
     private ErrorsEnum checkUserIsSystem(String userName){
         Optional<UserEntity> user= Optional.ofNullable(getByUserName(userName));
@@ -111,19 +119,20 @@ public class UserServer {
         }
         return ErrorsEnum.USER_EXIST_ERROR;
     }
-    private UserVoPlusCode checkUserForUpdate(UserVoPlusCode userVO){
+    private UserVoPlusCode checkUserForUpdate(UserVO userVO){
         UserEntity user=getById(userVO.getId());
+        UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
+        BeanUtils.copyProperties(userVO,userVoPlusCode);
         if(user==null){
-            userVO.setE(ErrorsEnum.USER_NOT_FOUND_ERROR);
-            return userVO;
+            userVoPlusCode.setE(ErrorsEnum.USER_NOT_FOUND_ERROR);
+            return userVoPlusCode;
         }
-        if(userVO.equals(user)){
-            userVO.setE(ErrorsEnum.NOT_CHANGED);
-            return userVO;
+        if(userVoPlusCode.equals(user)){
+            userVoPlusCode.setE(ErrorsEnum.NOT_CHANGED);
+            return userVoPlusCode;
         }
-        ErrorsEnum e;
-        userVO=checkUser(userVO);
-        return userVO;
+        userVoPlusCode=checkUser(userVO);
+        return userVoPlusCode;
     }
     private UserEntity getById(long id){
         UserEntity user;

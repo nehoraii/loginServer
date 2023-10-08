@@ -14,7 +14,7 @@ public class UserLogic {
 
     private static int sizeOfCode=6;
     private static  int ageConnectUser=7;
-    private static String pathToGmailServer="http://localhost:8080/sendGmail/send";
+    private static String pathToGmailServer="http://localhost:8083/sendGmail/send";
     private static int minLengthName=1;
 
 

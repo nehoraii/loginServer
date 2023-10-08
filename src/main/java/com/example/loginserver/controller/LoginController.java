@@ -20,15 +20,7 @@ public class LoginController {
         loginVo.setIp(request.getRemoteAddr());
         LoginVo loginVo1;
         loginVo1=loginServer.save(loginVo);
-        return loginVo1;
-    }
-    @DeleteMapping("/delete")
-    public ErrorsEnum delete(@RequestBody LoginVo loginVo){
-        return loginServer.delete(loginVo.getId());
-    }
-    @PutMapping("/update")
-    public ErrorsEnum update(@RequestBody LoginVo loginVo){
-        return loginServer.update(loginVo);
+         return loginVo1;
     }
     @PostMapping("/getLoginByUserName")
     public LoginVo getLoginObjectByUserName(@RequestBody LoginVo loginVo){
