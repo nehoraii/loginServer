@@ -1,6 +1,5 @@
 package com.example.loginserver.logic;
 
-import com.example.loginserver.entity.PasswordEntity;
 import com.example.loginserver.entity.UserEntity;
 import com.example.loginserver.vo.UserVO;
 import com.example.loginserver.vo.UserVoPlusCode;

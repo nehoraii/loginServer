@@ -39,4 +39,9 @@ public class UserController {
         UserVO user=userServer.getUserByUserName(userVO);
         return user;
     }
+    @PostMapping("/getUserById")
+    public UserVoPlusCode getUserById(@RequestBody UserVO userVO){
+        UserVoPlusCode user=userServer.getUserById(userVO);
+        return user;
+    }
 }

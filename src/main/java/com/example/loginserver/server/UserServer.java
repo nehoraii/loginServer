@@ -139,6 +139,14 @@ public class UserServer {
         user=userRepository.getById(id);
         return user;
     }
+    public UserVoPlusCode getUserById(UserVO userVO){
+       UserEntity userEntity=getById(userVO.getId());
+       Security.decipherUserObjectFromDB(userEntity);
+       UserVoPlusCode userVORet=new UserVoPlusCode();
+       BeanUtils.copyProperties(userEntity,userVORet);
+       Security.encodeUserObjectToClient(userVORet);
+       return userVORet;
+    }
     public String getSecretKey(Long userId){
         UserEntity user=userRepository.getById(userId);
         String secretCode=user.getSecretKey();
