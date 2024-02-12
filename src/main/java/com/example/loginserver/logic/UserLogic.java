@@ -92,7 +92,7 @@ public class UserLogic {
         to.setUserName(from.getUserName());
         to.setBirthDay(from.getBirthDay());
     }
-    public static void copyProperty(UserEntity from, UserVoPlusCode to,String code){
+    /*    public static void copyProperty(UserEntity from, UserVoPlusCode to,String code){
         to.setId(from.getId());
         to.setName(from.getName());
         to.setEmail(from.getEmail());
@@ -103,6 +103,8 @@ public class UserLogic {
         to.setBirthDay(from.getBirthDay());
         to.setCode(code);
     }
+
+ */
     public static String getCodeToEmail(){
         String code="";
         Random random=new Random();

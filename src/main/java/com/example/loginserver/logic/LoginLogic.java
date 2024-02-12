@@ -13,15 +13,6 @@ public class LoginLogic {
         String hexKey = Hex.encodeHexString(bytes);
         return TOTP.getOTP(hexKey);
     }
-    public static void copyProperty(LoginVo from, LoginEntity to){
-        to.setId(from.getId());
-        to.setSec(from.isSec());
-        to.setDate(from.getDate());
-        to.setIp(from.getIp());
-        to.setPass(from.getPass());
-        to.setUserId(from.getUserId());
-        to.setSecretCode(from.getSecretCode());
-    }
     public static void copyProperty(LoginEntity from, LoginVo to){
         to.setId(from.getId());
         to.setSec(from.isSec());
