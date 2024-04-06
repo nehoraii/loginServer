@@ -31,7 +31,7 @@ public class PasswordEntity implements Serializable {
     private Long id;
     @Basic(optional = false)
     @Column(name = "user_id")
-    private long userId;
+    private Long userId;
     @Basic(optional = false)
     @Column(name = "pass")
     private String pass;

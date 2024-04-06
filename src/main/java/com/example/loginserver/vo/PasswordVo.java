@@ -7,7 +7,7 @@ import java.util.Date;
 @Data
 public class PasswordVo {
     private Long id;
-    private long userId;
+    private Long userId;
     private String pass;
     private ErrorsEnum e;
 }

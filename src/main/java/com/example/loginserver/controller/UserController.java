@@ -1,12 +1,7 @@
 package com.example.loginserver.controller;
 
-import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.server.UserServer;
-import com.example.loginserver.vo.UserVoPlusCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.example.loginserver.vo.UserVO;
@@ -18,11 +13,10 @@ import com.example.loginserver.vo.UserVO;
 public class UserController {
     @Autowired
     private UserServer userServer;
-    private ErrorsEnum e;
 
     @PostMapping("/save")
-    public UserVoPlusCode addUser(@RequestBody UserVO userVO){
-        UserVoPlusCode user;
+    public UserVO addUser(@RequestBody UserVO userVO){
+        UserVO user;
         user=userServer.save(userVO);
         return user;
     }
@@ -40,8 +34,8 @@ public class UserController {
         return user;
     }
     @PostMapping("/getUserById")
-    public UserVoPlusCode getUserById(@RequestBody UserVO userVO){
-        UserVoPlusCode user=userServer.getUserById(userVO);
+    public UserVO getUserById(@RequestBody UserVO userVO){
+        UserVO user=userServer.getUserById(userVO);
         return user;
     }
 }

@@ -2,36 +2,35 @@ package com.example.loginserver.logic;
 
 import com.example.loginserver.entity.UserEntity;
 import com.example.loginserver.vo.UserVO;
-import com.example.loginserver.vo.UserVoPlusCode;
 
 public class Security {
-    private static int getPersonalNameKeyClient(String string){
-        char[] str=string.toCharArray();
+    private static int getPersonalNameKeyClient(String name){
+        char[] str=name.toCharArray();
         int sum=(str[0]+str[str.length-1]);
         return sum/13;
     }
-    private static int getSecNameKeyClient(String string){
-        char[] str=string.toCharArray();
+    private static int getSecNameKeyClient(String secName){
+        char[] str=secName.toCharArray();
         int sum=(str[0]+str[str.length-1]);
         return sum/5;
     }
-    private static int getEmailKeyClient(String string){
-        char[] str=string.toCharArray();
+    private static int getEmailKeyClient(String email){
+        char[] str=email.toCharArray();
         int sum=(str[0]-str[str.length-1]);
         return sum/7;
     }
-    private static int getPhoneNumKeyClient(String string){
-        char[] str=string.toCharArray();
+    private static int getPhoneNumKeyClient(String phone){
+        char[] str=phone.toCharArray();
         int sum=(str[0]*str[str.length-1]);
         return sum/13;
     }
-    private static int getUserNameKeyClient(String string){
-        char[] str=string.toCharArray();
+    private static int getUserNameKeyClient(String userName){
+        char[] str=userName.toCharArray();
         int sum=(str[0]*str[str.length-1]);
         return sum/11;
     }
-    private static int getPassKeyClient(String string){
-        char[] str=string.toCharArray();
+    private static int getPassKeyClient(String pass){
+        char[] str=pass.toCharArray();
         int sum=(str[0]+str[str.length-1]);
         return sum/11;
     }
@@ -41,37 +40,42 @@ public class Security {
         int sum=(str[0]+str[str.length-1]);
         return sum/13;
     }
+    private static int getSecretKeyKeyClient(String secretKey){
+        char[] str=secretKey.toCharArray();
+        int sum=(str[0]+str[str.length-1]);
+        return sum/19;
+    }
 
 
-    private static int getPersonalNameKeyDB(String string){
-        char[] str=string.toCharArray();
+    private static int getPersonalNameKeyDB(String name){
+        char[] str=name.toCharArray();
         int sum=(str[0]*str[str.length-1]);
         return sum/13;
     }
-    private static int getSecNameKeyDB(String string){
-        char[] str=string.toCharArray();
+    private static int getSecNameKeyDB(String secName){
+        char[] str=secName.toCharArray();
         int sum=(str[0]+str[str.length-1]);
         return sum/7;
     }
-    private static int getEmailKeyDB(String string){
-        char[] str=string.toCharArray();
+    private static int getEmailKeyDB(String email){
+        char[] str=email.toCharArray();
         int sum=(str[0]*str[str.length-1]);
         return sum/9;
     }
-    private static int getPhoneNumKeyDB(String string){
-        char[] str=string.toCharArray();
+    private static int getPhoneNumKeyDB(String phone){
+        char[] str=phone.toCharArray();
         int sum=(str[0]+str[str.length-1]);
         return sum/11;
     }
-    private static int getUserNameKeyDB(String string){
-        char[] str=string.toCharArray();
+    private static int getUserNameKeyDB(String userName){
+        char[] str=userName.toCharArray();
         int sum=(str[0]*str[str.length-1]);
         return sum/9;
     }
-    private static int getPassKeyDB(String string){
-        char[] str=string.toCharArray();
+    private static int getPassKeyDB(String pass){
+        char[] str=pass.toCharArray();
         int sum=(str[0]+str[str.length-1]);
-        return sum/3;
+        return sum/13;
     }
     private static int getSecretKeyKeyDB(String secretKey){
         char[] str=secretKey.toCharArray();
@@ -166,7 +170,7 @@ public class Security {
     }
 
 
-    public static void encodeUserObjectToClient(UserVoPlusCode userVoPlusCode){
+    public static void encodeUserObjectToClient(UserVO userVoPlusCode){
         String ans;
         if(userVoPlusCode.getUserName()!=null){
             String userName=userVoPlusCode.getUserName();
@@ -198,6 +202,12 @@ public class Security {
             ans=code(code,getCodeKeyClient(code),1,code.length()-1,true);
             userVoPlusCode.setCode(ans);
         }
+        if(userVoPlusCode.getSecretKey()!=null){
+            String secretKey=userVoPlusCode.getSecretKey();
+            ans=secretKey(secretKey,getSecretKeyKeyClient(secretKey),1,secretKey.length()-1,true);
+            userVoPlusCode.setSecretKey(ans);
+        }
+
     }
     public static void decipherUserObjectFromClient(UserVO userVO){
         String ans;
@@ -239,8 +249,6 @@ public class Security {
         pass=password(password,getPassKeyDB(password),1,password.length()-1,false);
         return pass;
     }
-
-
     private static void adding(char[] str,int startIndex,int lastIndex,int key){
         for (int i = startIndex; i < lastIndex; i++) {
             str[i]+=key;
@@ -259,8 +267,6 @@ public class Security {
             str[i]-=key;
         }
     }
-
-
     private static String personalName(String str,int key,int startIndex,int lastIndex,boolean encode){
         char []st=str.toCharArray();
         if(encode){

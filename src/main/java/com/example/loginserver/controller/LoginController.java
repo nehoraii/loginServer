@@ -1,6 +1,5 @@
 package com.example.loginserver.controller;
 
-import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.server.LoginServer;
 import com.example.loginserver.vo.LoginVo;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,11 +21,11 @@ public class LoginController {
         loginVo1=loginServer.save(loginVo);
          return loginVo1;
     }
-    @PostMapping("/getLoginByUserName")
-    public LoginVo getLoginObjectByUserName(@RequestBody LoginVo loginVo){
+   /* @PostMapping("/getLoginByUserName")
+    public LoginVo getLoginObjectByUserId(@RequestBody LoginVo loginVo){
         loginVo=loginServer.getLoginObjectByUserId(loginVo);
         return loginVo;
-    }
+    }*/
     @PostMapping("/conSecretCode")
     public LoginVo conSecretCode(@RequestBody LoginVo loginVo){
         LoginVo login;

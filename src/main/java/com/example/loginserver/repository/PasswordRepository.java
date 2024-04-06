@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface PasswordRepository extends JpaRepository<PasswordEntity,Long> {
     @Query(value = "SELECT * FROM password WHERE user_id=?1",nativeQuery = true)
-    Optional<List<PasswordEntity>>getAllById(long userId);
+    Optional<List<PasswordEntity>>getAllById(Long userId);
 }

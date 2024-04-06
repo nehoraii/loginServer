@@ -1,9 +1,7 @@
 package com.example.loginserver.logic;
-import com.example.loginserver.entity.UserEntity;
-import com.example.loginserver.enums.ErrorsEnum;
-import com.example.loginserver.vo.UserVoPlusCode;
-import org.apache.commons.codec.binary.Base32;
 
+import com.example.loginserver.enums.ErrorsEnum;
+import org.apache.commons.codec.binary.Base32;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Date;
@@ -12,7 +10,7 @@ import java.util.Random;
 
 public class UserLogic {
 
-    private static int sizeOfCode=6;
+    private static int sizeOfCodeToEmail=6;
     private static  int ageConnectUser=7;
     private static String pathToGmailServer="http://localhost:8083/sendGmail/send";
     private static int minLengthName=1;
@@ -55,7 +53,7 @@ public class UserLogic {
         }
         return e;
     }
-    public static    ErrorsEnum checkName(String name){
+    public static ErrorsEnum checkName(String name){
         if(name.contains("[0-9]")){
             return ErrorsEnum.THERE_IS_NUMBER;
         }
@@ -82,7 +80,7 @@ public class UserLogic {
         return base32.encodeToString(bytes);
 
     }
-    public static void copyProperty(UserEntity from, UserVoPlusCode to){
+   /* public static void copyProperty(UserEntity from, UserVoPlusCode to){
         to.setId(from.getId());
         to.setName(from.getName());
         to.setEmail(from.getEmail());
@@ -91,7 +89,7 @@ public class UserLogic {
         to.setSecName(from.getSecName());
         to.setUserName(from.getUserName());
         to.setBirthDay(from.getBirthDay());
-    }
+    }*/
     /*    public static void copyProperty(UserEntity from, UserVoPlusCode to,String code){
         to.setId(from.getId());
         to.setName(from.getName());
@@ -108,9 +106,10 @@ public class UserLogic {
     public static String getCodeToEmail(){
         String code="";
         Random random=new Random();
-        for (int i = 0; i <sizeOfCode ; i++) {
+        for (int i = 0; i <sizeOfCodeToEmail ; i++) {
             code+=random.nextInt(10);
         }
+        System.out.println(code);
         return code;
     }
 }

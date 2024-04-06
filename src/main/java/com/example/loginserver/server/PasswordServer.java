@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -34,17 +33,17 @@ public class PasswordServer {
             return e;
         }
         PasswordEntity bean= new PasswordEntity();
-        bean.setDate(new Date());
         BeanUtils.copyProperties(passwordVo,bean);
+        bean.setDate(new Date());
         String passToDB;
         passToDB=Security.encodeToDBPass(bean.getPass());
         bean.setPass(passToDB);
         passwordRepository.save(bean);
         return ErrorsEnum.GOOD;
     }
-    private ErrorsEnum changePassForUpdate(long id,String password){
+    private ErrorsEnum changePassForUpdate(Long userId,String password){
         Optional<List<PasswordEntity>> passwordEntity;
-        passwordEntity=passwordRepository.getAllById(id);
+        passwordEntity=passwordRepository.getAllById(userId);
         if(!passwordEntity.isPresent()){
             return ErrorsEnum.USER_NOT_FOUND_ERROR;
         }
@@ -55,7 +54,7 @@ public class PasswordServer {
         if(passEntity.equals(password)){
             return ErrorsEnum.THE_SAME_PASSWORD;
         }
-        for (int i = 0; i < passwordEntity.get().size(); i++) {
+        for (int i = 0; i < passwordEntity.get().size()-1; i++) {
             if(passwordEntity.get().get(i).equals(password)){
                 return ErrorsEnum.PAST_USE;
             }

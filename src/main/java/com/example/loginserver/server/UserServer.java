@@ -5,8 +5,6 @@ import com.example.loginserver.enums.ErrorsEnum;
 import com.example.loginserver.logic.Security;
 import com.example.loginserver.logic.UserLogic;
 import com.example.loginserver.repository.UserRepository;
-import com.example.loginserver.vo.UserVoPlusCode;
-import org.apache.catalina.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,15 +16,14 @@ import java.util.Optional;
 public class UserServer {
     @Autowired
     private  UserRepository userRepository;
-    public UserVoPlusCode save(UserVO userVO){
+    public UserVO save(UserVO userVO){
         Security.decipherUserObjectFromClient(userVO);
-        UserVoPlusCode userVoPlusCode;
+        UserVO userVoPlusCode;
         userVoPlusCode=checkUser(userVO);
         if(userVoPlusCode.getE()!=ErrorsEnum.GOOD){
             Security.encodeUserObjectToClient(userVoPlusCode);
             return userVoPlusCode;
         }
-
         String secretKey= UserLogic.getSecretKey();
         System.out.println(secretKey);
         userVoPlusCode.setSecretKey(secretKey);
@@ -36,11 +33,19 @@ public class UserServer {
         Security.encodeUserObjectToDB(bean);
         user=userRepository.save(bean);
         Security.decipherUserObjectFromDB(user);
-        UserLogic.copyProperty(user,userVoPlusCode);
+        BeanUtils.copyProperties(user,userVoPlusCode);
         userVoPlusCode.setE(ErrorsEnum.GOOD);
-        Security.encodeUserObjectToClient(userVoPlusCode);
-        return userVoPlusCode;
+        UserVO userRet=new UserVO();
+        userRet.setSecretKey(userVoPlusCode.getSecretKey());
+        userRet.setCode(userVoPlusCode.getCode());
+        userRet.setId(userVoPlusCode.getId());
+        Security.encodeUserObjectToClient(userRet);
+        userRet.setE(userVoPlusCode.getE());
+        return userRet;
 
+    }
+    public void deleteById(Long userId){
+        userRepository.deleteById(userId);
     }
     /*public UserVoPlusCode update(UserVO userVO){
         ErrorsEnum e;
@@ -83,9 +88,9 @@ public class UserServer {
         return userVO;
     }
     //בדיקת המשתמש בכללי בעצם קורא לכל הפונקציות
-    private UserVoPlusCode checkUser(UserVO user){
+    private UserVO checkUser(UserVO user){
         ErrorsEnum e;
-        UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
+        UserVO userVoPlusCode=new UserVO();
         BeanUtils.copyProperties(user,userVoPlusCode);
         e=checkUserIsSystem(userVoPlusCode.getUserName());
         if(e!=ErrorsEnum.GOOD){
@@ -99,10 +104,11 @@ public class UserServer {
         }
         userVoPlusCode.setCode(UserLogic.getCodeToEmail());
         e=UserLogic.checkEmail(userVoPlusCode.getEmail(),userVoPlusCode.getCode());
-        if(e!=ErrorsEnum.GOOD){
+       /* if(e!=ErrorsEnum.GOOD){
             userVoPlusCode.setE(e);
             return userVoPlusCode;
         }
+        */
         e=UserLogic.checkName(userVoPlusCode.getName());
         if(e!=ErrorsEnum.GOOD){
             userVoPlusCode.setE(e);
@@ -119,7 +125,7 @@ public class UserServer {
         }
         return ErrorsEnum.USER_EXIST_ERROR;
     }
-    private UserVoPlusCode checkUserForUpdate(UserVO userVO){
+    /*private UserVoPlusCode checkUserForUpdate(UserVO userVO){
         UserEntity user=getById(userVO.getId());
         UserVoPlusCode userVoPlusCode=new UserVoPlusCode();
         BeanUtils.copyProperties(userVO,userVoPlusCode);
@@ -134,18 +140,21 @@ public class UserServer {
         userVoPlusCode=checkUser(userVO);
         return userVoPlusCode;
     }
-    private UserEntity getById(long id){
+     */
+    private UserEntity getById(Long id){
         UserEntity user;
         user=userRepository.getById(id);
         return user;
     }
-    public UserVoPlusCode getUserById(UserVO userVO){
+    public UserVO getUserById(UserVO userVO){
        UserEntity userEntity=getById(userVO.getId());
        Security.decipherUserObjectFromDB(userEntity);
-       UserVoPlusCode userVORet=new UserVoPlusCode();
+        UserVO userVORet=new UserVO();
        BeanUtils.copyProperties(userEntity,userVORet);
        Security.encodeUserObjectToClient(userVORet);
-       return userVORet;
+       UserVO userVORet2=new UserVO();
+        BeanUtils.copyProperties(userVORet,userVORet2);
+       return userVORet2;
     }
     public String getSecretKey(Long userId){
         UserEntity user=userRepository.getById(userId);

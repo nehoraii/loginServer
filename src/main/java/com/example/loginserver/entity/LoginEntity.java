@@ -23,7 +23,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @Data
-public class LoginEntity implements Serializable {
+public class LoginEntity{
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,7 @@ public class LoginEntity implements Serializable {
     @Column(name = "id")
     private Long id;
     @Column(name = "user_id")
-    private long userId;
+    private Long userId;
     @Column(name = "pass")
     private String pass;
     @Basic(optional = false)

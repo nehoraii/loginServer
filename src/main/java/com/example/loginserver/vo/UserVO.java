@@ -14,6 +14,7 @@ public class UserVO {
     private String userName;
     private Date birthDay;
     private String secretKey;
+    private String code;
     private ErrorsEnum e;
 
 
