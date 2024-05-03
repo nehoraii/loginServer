@@ -11,9 +11,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/Login")
 @CrossOrigin(origins = "*")
+//מחלקה שאחראית לנתב את בקשות הקליינט על פי כתובת ה-URL שממנו הגיעה ובכך להפנות את בקשתו לפונקצחיה המתאימה
 public class LoginController {
     @Autowired
-    private LoginServer loginServer;
+    private LoginServer loginServer; //אובייקט הכלה של הקלאס loginServer
+
+    /*
+    * מקבלת: אובייקט LoginVo ואת כתובת ה-IP של המחשב מקור.
+    מבצעת: שולחת את האובייקט לקלאס LoginServer וזאת לאחר ששמה את כתובת ה-IP של המחשב ששלח את הבקשה באובייקט.
+    מחזירה: מחזירה אובייקט LoginVO שבתוכו יש נתונים שהקליינט צריך.
+    */
     @PostMapping("/save")
     public LoginVo save(@RequestBody LoginVo loginVo, HttpServletRequest request){
         loginVo.setIp(request.getRemoteAddr());
@@ -26,6 +33,12 @@ public class LoginController {
         loginVo=loginServer.getLoginObjectByUserId(loginVo);
         return loginVo;
     }*/
+
+    /*
+    מקבלת: אובייקט LoginVo.
+    מבצעת: בודקת אם ה-SecretCode שהמשתמש הכניס הוא נכון.
+    מחזירה: מחזירה אובייקט LoginVO שבתוכו יש נתונים שהקליינט צריך.
+    */
     @PostMapping("/conSecretCode")
     public LoginVo conSecretCode(@RequestBody LoginVo loginVo){
         LoginVo login;

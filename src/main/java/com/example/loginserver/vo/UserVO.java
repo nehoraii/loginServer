@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.Date;
 @Data
+//המחלקה המתארת את אובייקט המשתמש ובו השדות הרלוונטים בלבד
 public class UserVO {
     private Long id;
     private String name;

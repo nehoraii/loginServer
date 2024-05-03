@@ -23,6 +23,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @Data
+//קלאס המייצג את הטבלת LOGIN ב-DB
 public class LoginEntity{
     private static final long serialVersionUID = 1L;
     @Id

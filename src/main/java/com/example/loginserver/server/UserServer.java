@@ -13,9 +13,17 @@ import com.example.loginserver.vo.UserVO;
 import java.util.Optional;
 
 @Service
+//קלאס האחראי ללוגיקה ולבאת המידע המתאים וסימנונו מהמסד מידע
 public class UserServer {
     @Autowired
-    private  UserRepository userRepository;
+    private  UserRepository userRepository; //אובייקט הכלה מסוג .UserRepository
+
+    /*
+    מקבלת: אובייקט המתאר את המשתמש.
+    מבצעת: בודקת אם הוא עומד בכל הקריטריונים שהוצבו במערכת מראש.
+    מחזירה: מחזירה אובייקט שמכיל בתוכו שדות שהקליינט צריך וכן יש שם את הקוד לאימות כתובת המייל.
+    */
+
     public UserVO save(UserVO userVO){
         Security.decipherUserObjectFromClient(userVO);
         UserVO userVoPlusCode;
@@ -44,6 +52,8 @@ public class UserServer {
         return userRet;
 
     }
+
+
     public void deleteById(Long userId){
         userRepository.deleteById(userId);
     }
@@ -64,6 +74,14 @@ public class UserServer {
 
      */
     //בגלל שיש שאילתה ואני צריך את המשתנה server אז בניתי כאן את הפונקצייה בודקת אם קיים שם משתמש כזה
+
+
+    /*
+    מקבלת: שם המשתמש של המשתמש.
+    מבצעת: מביאה את השורה שמייצגת את המשתמש.
+    מחזירה: מחזירה אובייקט שמייצג את המשתמש.
+    */
+
    private UserEntity getByUserName(String userName){
        UserEntity userEntity=new UserEntity();
        userEntity.setUserName(userName);
@@ -75,6 +93,13 @@ public class UserServer {
         Security.decipherUserObjectFromDB(user.get());
         return user.get();
     }
+
+    /*
+    מקבלת: שם המשתמש של המשתמש.
+    מבצעת: מביאה את השורה שמייצגת את המשתמש.
+    מחזירה: מחזירה אובייקט VO שמייצג את המשתמש.
+
+    */
     public UserVO getUserByUserName(UserVO userVo){
         Security.decipherUserObjectFromClient(userVo);
         UserEntity user=getByUserName(userVo.getUserName());
@@ -88,6 +113,12 @@ public class UserServer {
         return userVO;
     }
     //בדיקת המשתמש בכללי בעצם קורא לכל הפונקציות
+
+    /*
+    מקבלת: שם המשתמש של המשתמש.
+    מבצעת: בודקת אם שם המשתמש הזה עומד בכל הקריטריונים שהובו במערכת מראש.
+    מחזירה: מחזירה האם שם המשתמש עובר את המבחנים שהצבנו, במידה ולא תחזיר את סיבת הבעיה.
+    */
     private UserVO checkUser(UserVO user){
         ErrorsEnum e;
         UserVO userVoPlusCode=new UserVO();
@@ -118,6 +149,13 @@ public class UserServer {
         userVoPlusCode.setE(e);
         return userVoPlusCode;
     }
+
+
+    /*
+    מקבלת: שם המשתמש של המשתמש.
+    מבצעת: בודקת האם שם המשתמש הזה תפוס.
+    מחזירה: מחזירה האם שם המשתמש תפוס.
+    */
     private ErrorsEnum checkUserIsSystem(String userName){
         Optional<UserEntity> user= Optional.ofNullable(getByUserName(userName));
         if(!user.isPresent()){
@@ -141,11 +179,23 @@ public class UserServer {
         return userVoPlusCode;
     }
      */
+
+    /*
+    מקבלת: המזהה הייחודי של המשתמש.
+    מבצעת: מביאה את השורה על פי המזהה.
+    מחזירה: מחזירה אובייקט המייצג את השורה מסוג UserEntity.
+    */
     private UserEntity getById(Long id){
         UserEntity user;
         user=userRepository.getById(id);
         return user;
     }
+
+    /*
+    מקבלת: מקבלת אובייקט המייצג את המשתמש.
+    מבצעת: מביאה את השורה על פי המזהה.
+    מחזירה: מחזירה אובייקט המייצג את השורה מסוג UserVO.
+    */
     public UserVO getUserById(UserVO userVO){
        UserEntity userEntity=getById(userVO.getId());
        Security.decipherUserObjectFromDB(userEntity);
@@ -156,6 +206,12 @@ public class UserServer {
         BeanUtils.copyProperties(userVORet,userVORet2);
        return userVORet2;
     }
+
+    /*
+    מקבלת: מקבלת את המזהה הייחודי של המשתמש.
+    מבצעת: מביאה את המפתח הסודי של אותו משתמש.
+    מחזירה: מחזירה את המפתח.
+    */
     public String getSecretKey(Long userId){
         UserEntity user=userRepository.getById(userId);
         String secretCode=user.getSecretKey();

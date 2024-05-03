@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.Date;
 @Data
+//מחלקה המייצגת את אובייקט הסיסמה ובו השדות הרלוונטים בלבד
 public class PasswordVo {
     private Long id;
     private Long userId;

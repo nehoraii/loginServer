@@ -1,5 +1,5 @@
 package com.example.loginserver.enums;
-
+//מייצג את המצב כלומר האם השמירה הצליחה האם יש בעיה ואם כן מה היא
 public enum ErrorsEnum {
     URL_ERROR,
     OPEN_CONNECTION_ERROR,

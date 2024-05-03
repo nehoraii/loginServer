@@ -20,32 +20,60 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
+//קלאס האחראי ללוגיקה ולבאת המידע המתאים וסימנונו מהמסד מידע
 public class LoginServer {
-    private int  sizeSpam=50;
-    private int sizeBlock=3;
-    private int timeBlockMinutes=15;
-    private int timeBetweenSpamMinutes= 15;
+    private int  sizeSpam=50; //שדה המכיל את גודל השגיאות התחברות המקסימלי שאם המשתמש עובר אותו זה נחשב כבר תקיפת ספאם.
+    private int sizeBlock=3;//שדה המכיל את גודל השגיאות התחברות המקסימלי שאם המשתמש עובר אותו אנו נאלץ לחסום את המשתמש.
+    private int timeBlockMinutes=15;//שדה המכיל את הזמן שנאלץ לחסום את המשתמש במידה ונחסם.
+    private int timeBetweenSpamMinutes= 15;//שדה המכיל את הזמן שנאלץ לחסום את המשתמש במידה ויש תקיפת ספאם על חשבונו.
     @Autowired
-    private UserServer userServer;
+    private UserServer userServer; //אובייקט הכלה מסוג UserServer.
     @Autowired
-    private LoginRepository loginRepository;
+    private LoginRepository loginRepository; // אובייקט הכלה מסוג LoginRepository.
 
+    /*
+    מקבלת: כלום.
+    מבצעת: מביאה את הערך מהשדה.
+    מחזירה: את מספר הדקות שיש להמתין לאחר ספאם.
+    */
     public int getTimeBetweenSpamMinutes() {
         return timeBetweenSpamMinutes;
     }
 
+    /*
+    מקבלת: כלום.
+    מבצעת: מביאה את הערך מהשדה.
+מחזירה: את מספר הניסיונות שכשלו המקסימאלי שאז יקרא ספאם.
+    */
     public int getSizeSpam() {
         return sizeSpam;
     }
 
+    /*
+    מקבלת: כלום.
+    מבצעת: מביאה את הערך מהשדה.
+    מחזירה: את מספר הניסיונות שכשלו המקסימאלי שהמשתמש ייחסם.
+
+    */
     public int getSizeBlock() {
         return sizeBlock;
     }
 
+    /*
+    מקבלת: כלום.
+    מבצעת: מביאה את הערך מהשדה.
+    מחזירה: את מספר הדקות שיש להמתין לאחר חסימה.
+    */
     public int getTimeBlockMinutes() {
         return timeBlockMinutes;
     }
 
+    /*
+    מקבלת: אובייקט LoginVo.
+    מבצעת: בודקת אם צריך חסימה או שיש התקפת ספאם או אםא המשתמש לא קיים או אם הסיסמה לא נכונה.
+    מחזירה: מחזירה אם הצליחה לעדכן בהצלחה ואם לא מחזירה את סיבת הבעיה.
+
+    */
     public LoginVo save(LoginVo loginVo){
         String decipherPass=Security.decipherFromClientForPass(loginVo.getPass());
         loginVo.setPass(decipherPass);
@@ -110,6 +138,12 @@ public class LoginServer {
         loginVoFun.setId(loginVo.getId());
         return loginVoFun;
     }
+
+    /*
+    מקבלת: אובייקט LoginVo.
+    מבצעת: מעדכנת את השדה של הקוד הסודי לאותו אובייקט.
+    מחזירה: מחזירה אם הצליחה לעדכן בהצלחה ואם לא מחזירה את סיבת הבעיה.
+    */
     private ErrorsEnum updateToSecretKey(LoginVo loginVo){
         Optional<LoginEntity> loginEntity=getById(loginVo.getId());
         if(!loginEntity.isPresent()){
@@ -137,16 +171,35 @@ public class LoginServer {
         return loginVo;
     }
      */
+
+    /*
+    מקבלת: אובייקט LoginVo.
+    מבצעת: שומרת אותו במסד הנתונים.
+    מחזירה: כלום.
+
+    */
     private void saveObject(LoginVo loginVo){
         LoginEntity bean= new LoginEntity();
         BeanUtils.copyProperties(loginVo,bean);
         bean=loginRepository.save(bean);
         BeanUtils.copyProperties(bean,loginVo);
     }
+
+    /*
+    מקבלת: מזהה ייחודי של האובייקט LoginVo.
+    מבצעת: מביאה את השורה מהמסד נתונים.
+    מחזירה: אובייקט המייצג את השורה.
+    */
     private Optional<LoginEntity> getById(Long id){
         Optional<LoginEntity> user=loginRepository.findById(id);
         return user;
     }
+
+    /*
+    מקבלת: מזהה ייחודי של האובייקט ,LoginVo, ותאריך.
+    מבצעת: בודקת האם צריך לחסום את המשתמש או שהוא כבר חסום.
+    מחזירה: מחזירה את סיבת הבעיה.
+    */
     private ErrorsEnum checkBlock(Long id,Date dateUser){
         Optional<List<LoginEntity>> user;
         user=loginRepository.getLastThree(id,getSizeBlock());
@@ -174,6 +227,12 @@ public class LoginServer {
         }
         return ErrorsEnum.BLOCK;
     }
+
+    /*
+    מקבלת: מזהה ייחודי של האובייקט ,LoginVo, ותאריך.
+מבצעת: בודקת האם יש עלינו מתקפת ספאם.
+    מחזירה: מחזירה את סיבת הבעיה.
+    */
     private ErrorsEnum checkSpam(Long id,Date dateUser){
         Optional<List<LoginEntity>>user;
         Calendar cal = Calendar.getInstance();
@@ -195,6 +254,12 @@ public class LoginServer {
         }
         return ErrorsEnum.SPAM;
     }
+
+    /*
+    מקבלת: מזהה ייחודי של המשתמש.
+    מבצעת: מביאה את המידע מהמסד נתונים.
+    מחזירה: מחזירה את האובייקט  שמייצג את השורה במסד הנתונים.
+    */
     private UserEntity getByUserId(Long userId){
         Optional<UserEntity> user;
         user=loginRepository.getUserByUserId(userId);
@@ -203,6 +268,12 @@ public class LoginServer {
         }
         return user.get();
     }
+
+    /*
+    מקבלת: מזהה ייחודי של המשתמש.
+    מבצעת: מביאה את האובייקט סיסמה מהמסד נתונים.
+    מחזירה: מחזירה את האובייקט  שמייצג את השורה במסד הנתונים.
+    */
     private PasswordEntity getPassByUserId(Long userId){
         Object[] obj;
         obj=loginRepository.getPassByUserId(userId);
@@ -214,6 +285,12 @@ public class LoginServer {
         password.setDate((Date) obj[3]);
         return password;
     }
+
+    /*
+    מקבלת: אובייקט LoginVo.
+    מבצעת: בודקת לפי המפתח הסודי האם הקוד הסודי הזמני תואם למה שהמערכת הוציאה
+    מחזירה: מחזירה אובייקט ובתוך השדה שמכיל את התוצאה מחזירה את סיבת הבעיה במידה ויש.
+    */
     public LoginVo checkSecretCode(LoginVo loginVo){
         String key=userServer.getSecretKey(loginVo.getUserId());
         UserEntity userEntity=new UserEntity();

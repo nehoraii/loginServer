@@ -13,11 +13,18 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/Password")
 @CrossOrigin(origins = "*")
+//מחלקה שאחראית לנתב את בקשות הקליינט על פי כתובת ה-URL שממנו הגיעה ובכך להפנות את בקשתו לפונקצחיה המתאימה
 public class PasswordController {
     @Autowired
-    private PasswordServer passwordServer;
+    private PasswordServer passwordServer; //אובייקט הכלה של הקלאס PasswordServer.
     @Autowired
-    private UserServer userServer;
+    private UserServer userServer;//אובייקט הכלה של הקלאס UserServer.
+
+    /*
+    * מקבלת: אובייקט PasswordVo.
+    מבצעת: שומרת את האובייקט סיסמה במסד נתונים.
+    מחזירה: האם הסיסמה נשמרה בהצלחה ואם לא מחזירה את סיבת הבעיה.
+    */
     @PostMapping("/save")
     public ErrorsEnum save(@RequestBody PasswordVo passwordVo){
         ErrorsEnum e;

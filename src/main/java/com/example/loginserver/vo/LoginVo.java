@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
+//מחלקה המייצגת את אובייקט ההתחברות עם השדות הרלוונטים לנו בלבד
 public class LoginVo {
     private Long id;
     private Long userId;

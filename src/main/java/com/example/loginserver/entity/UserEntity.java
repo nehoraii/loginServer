@@ -21,9 +21,8 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+//קלאס המייצג את טבלת המשתמשים ב-DB
 public class UserEntity{
-
-    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)

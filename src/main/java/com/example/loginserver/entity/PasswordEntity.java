@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 import java.util.Date;
 
 
@@ -22,8 +20,8 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PasswordEntity implements Serializable {
-    private static final long serialVersionUID = 1L;
+//קלאס המייצג את טבלת הססמאות ב-DB
+public class PasswordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
